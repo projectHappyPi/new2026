@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String?  @unique
+  passwordHash String?
+  kakaoId      String?  @unique
+  nickname     String
+  role         String   @default("member") // member | admin
+  createdAt    DateTime @default(now())
+
+  ownedAlbums Album[]       @relation("AlbumOwner")
+  memberships AlbumMember[]
+  uploads     Media[]
+  accessLogs  AccessLog[]
+
+  @@map("users")
+}
+
+model Album {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  ownerId      String
+  owner        User     @relation("AlbumOwner", fields: [ownerId], references: [id])
+  coverMediaId String?
+  shareEnabled Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  members AlbumMember[]
+  media   Media[]
+  invites Invite[]
+
+  @@map("albums")
+}
+
+model AlbumMember {
+  id       String   @id @default(cuid())
+  albumId  String
+  album    Album    @relation(fields: [albumId], references: [id])
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  role     String   @default("member") // owner | member
+  joinedAt DateTime @default(now())
+
+  @@unique([albumId, userId])
+  @@map("album_members")
+}
+
+model Media {
+  id               String    @id @default(cuid())
+  albumId          String
+  album            Album     @relation(fields: [albumId], references: [id])
+  uploaderId       String
+  uploader         User      @relation(fields: [uploaderId], references: [id])
+  originalFilename String
+  mime             String
+  bytes            BigInt
+  width            Int?
+  height           Int?
+  path             String
+  takenAt          DateTime?
+  createdAt        DateTime  @default(now())
+  deletedAt        DateTime?
+
+  variants MediaVariant[]
+
+  @@map("media")
+}
+
+model MediaVariant {
+  id      String @id @default(cuid())
+  mediaId String
+  media   Media  @relation(fields: [mediaId], references: [id])
+  kind    String // thumb_200 | thumb_800 | thumb_1600
+  bytes   BigInt
+  path    String
+  width   Int?
+  height  Int?
+
+  @@map("media_variants")
+}
+
+model Invite {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  albumId   String
+  album     Album    @relation(fields: [albumId], references: [id])
+  expiresAt DateTime
+  maxUses   Int
+  useCount  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@map("invites")
+}
+
+model StorageStats {
+  id         String   @id @default(cuid())
+  date       String   @unique // yyyy-mm-dd
+  usedBytes  BigInt
+  freeBytes  BigInt
+  totalBytes BigInt
+  level      String
+  createdAt  DateTime @default(now())
+
+  @@map("storage_stats")
+}
+
+model AccessLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  albumId   String?
+  mediaId   String?
+  action    String // view | share | download | join | upload
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@map("access_logs")
+}
+
+model SystemFlag {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("system_flags")
+}
