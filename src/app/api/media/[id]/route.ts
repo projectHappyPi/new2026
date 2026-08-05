@@ -21,7 +21,17 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
     const { id } = await ctx.params;
     const user = await requireUser();
     const media = await loadMediaWithAccess(id, user.id);
-    const withVariants = await prisma.media.findUnique({ where: { id: media.id }, include: { variants: true, uploader: { select: { nickname: true } }, album: { select: { title: true, ownerId: true } } } });
+    const withVariants = await prisma.media.findUnique({
+      where: { id: media.id },
+      include: { variants: true, uploader: { select: { nickname: true } }, album: { select: { title: true, ownerId: true } }, reactions: true },
+    });
+
+    const counts: Record<string, number> = {};
+    let myReaction: string | null = null;
+    for (const r of withVariants?.reactions ?? []) {
+      counts[r.type] = (counts[r.type] ?? 0) + 1;
+      if (r.userId === user.id) myReaction = r.type;
+    }
 
     return NextResponse.json({
       id: media.id,
@@ -33,9 +43,12 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
       width: media.width,
       height: media.height,
       createdAt: media.createdAt,
+      takenAt: media.takenAt ?? media.createdAt,
       uploader: withVariants?.uploader.nickname,
       isOwner: withVariants?.album.ownerId === user.id,
       variants: withVariants?.variants.map((v) => ({ kind: v.kind })) ?? [],
+      reactionCounts: counts,
+      myReaction,
     });
   } catch (err) {
     return handleApiError(err);

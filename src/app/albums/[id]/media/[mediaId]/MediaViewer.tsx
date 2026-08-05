@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useShareActions } from "@/components/ShareMenu";
+import ReactionPicker from "@/components/ReactionPicker";
 
 export default function MediaViewer({
   albumId,
@@ -15,6 +16,8 @@ export default function MediaViewer({
   createdAt,
   canManage,
   canSetCover,
+  reactionCounts,
+  myReaction,
 }: {
   albumId: string;
   mediaId: string;
@@ -25,6 +28,8 @@ export default function MediaViewer({
   createdAt: string;
   canManage: boolean;
   canSetCover: boolean;
+  reactionCounts: Record<string, number>;
+  myReaction: string | null;
 }) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -150,6 +155,10 @@ export default function MediaViewer({
       <p className="mt-3 text-xs text-zinc-500">
         {uploader} · {date}
       </p>
+
+      <div className="mt-4 flex justify-center">
+        <ReactionPicker mediaId={mediaId} initialCounts={reactionCounts} initialMyReaction={myReaction} />
+      </div>
     </div>
   );
 }

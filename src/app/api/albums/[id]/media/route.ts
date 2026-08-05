@@ -53,6 +53,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
         width: processed.width,
         height: processed.height,
         path: processed.path,
+        takenAt: processed.takenAt,
         variants: {
           create: processed.variants.map((v) => ({
             kind: v.kind,
@@ -80,6 +81,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
         width: media.width,
         height: media.height,
         createdAt: media.createdAt,
+        takenAt: media.takenAt ?? media.createdAt,
         variants: media.variants.map((v) => ({ kind: v.kind, bytes: Number(v.bytes) })),
       },
       { status: 201 },
@@ -98,22 +100,33 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
     const media = await prisma.media.findMany({
       where: { albumId, deletedAt: null },
       orderBy: { createdAt: "desc" },
-      include: { variants: true, uploader: { select: { nickname: true } } },
+      include: { variants: true, uploader: { select: { nickname: true } }, reactions: true },
     });
 
     return NextResponse.json({
-      media: media.map((m) => ({
-        id: m.id,
-        originalFilename: m.originalFilename,
-        mime: m.mime,
-        bytes: Number(m.bytes),
-        width: m.width,
-        height: m.height,
-        createdAt: m.createdAt,
-        uploader: m.uploader.nickname,
-        isVideo: m.mime.startsWith("video/"),
-        thumbKinds: m.variants.map((v) => v.kind),
-      })),
+      media: media.map((m) => {
+        const counts: Record<string, number> = {};
+        let myReaction: string | null = null;
+        for (const r of m.reactions) {
+          counts[r.type] = (counts[r.type] ?? 0) + 1;
+          if (r.userId === user.id) myReaction = r.type;
+        }
+        return {
+          id: m.id,
+          originalFilename: m.originalFilename,
+          mime: m.mime,
+          bytes: Number(m.bytes),
+          width: m.width,
+          height: m.height,
+          createdAt: m.createdAt,
+          takenAt: m.takenAt ?? m.createdAt,
+          uploader: m.uploader.nickname,
+          isVideo: m.mime.startsWith("video/"),
+          thumbKinds: m.variants.map((v) => v.kind),
+          reactionCounts: counts,
+          myReaction,
+        };
+      }),
     });
   } catch (err) {
     return handleApiError(err);

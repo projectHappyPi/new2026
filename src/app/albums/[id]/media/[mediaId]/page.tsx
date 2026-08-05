@@ -18,7 +18,11 @@ export default async function MediaViewerPage({ params }: PageProps<"/albums/[id
 
   const media = await prisma.media.findUnique({
     where: { id: mediaId },
-    include: { album: { select: { title: true, ownerId: true } }, uploader: { select: { nickname: true } } },
+    include: {
+      album: { select: { title: true, ownerId: true } },
+      uploader: { select: { nickname: true } },
+      reactions: true,
+    },
   });
 
   if (!media || media.albumId !== albumId) {
@@ -45,6 +49,13 @@ export default async function MediaViewerPage({ params }: PageProps<"/albums/[id
   const isOwner = media.album.ownerId === user.id;
   const isUploader = media.uploaderId === user.id;
 
+  const reactionCounts: Record<string, number> = {};
+  let myReaction: string | null = null;
+  for (const r of media.reactions) {
+    reactionCounts[r.type] = (reactionCounts[r.type] ?? 0) + 1;
+    if (r.userId === user.id) myReaction = r.type;
+  }
+
   return (
     <MediaViewer
       albumId={albumId}
@@ -56,6 +67,8 @@ export default async function MediaViewerPage({ params }: PageProps<"/albums/[id
       createdAt={media.createdAt.toISOString()}
       canManage={isOwner || isUploader || user.role === "admin"}
       canSetCover={isOwner}
+      reactionCounts={reactionCounts}
+      myReaction={myReaction}
     />
   );
 }

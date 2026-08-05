@@ -20,6 +20,8 @@ model User {
   memberships AlbumMember[]
   uploads     Media[]
   accessLogs  AccessLog[]
+  reactions   Reaction[]
+  comments    Comment[]
 
   @@map("users")
 }
@@ -34,9 +36,10 @@ model Album {
   shareEnabled Boolean  @default(false)
   createdAt    DateTime @default(now())
 
-  members AlbumMember[]
-  media   Media[]
-  invites Invite[]
+  members  AlbumMember[]
+  media    Media[]
+  invites  Invite[]
+  comments Comment[]
 
   @@map("albums")
 }
@@ -70,7 +73,8 @@ model Media {
   createdAt        DateTime  @default(now())
   deletedAt        DateTime?
 
-  variants MediaVariant[]
+  variants  MediaVariant[]
+  reactions Reaction[]
 
   @@map("media")
 }
@@ -86,6 +90,33 @@ model MediaVariant {
   height  Int?
 
   @@map("media_variants")
+}
+
+model Reaction {
+  id        String   @id @default(cuid())
+  mediaId   String
+  media     Media    @relation(fields: [mediaId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String // like | cute | funny | wow
+  createdAt DateTime @default(now())
+
+  @@unique([mediaId, userId])
+  @@map("reactions")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  albumId   String
+  album     Album    @relation(fields: [albumId], references: [id])
+  dayKey    String // yyyy-mm-dd, groups comments onto a timeline day-card (same key as the media day grouping)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([albumId, dayKey])
+  @@map("comments")
 }
 
 model Invite {

@@ -1,10 +1,15 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { randomUUID } from "node:crypto";
+import { execFile } from "node:child_process";
 import sharp from "sharp";
+import ffmpegPath from "ffmpeg-static";
+import exifr from "exifr";
 import { getEnv } from "./env";
 import { buildMediaPath, buildVariantPath, absoluteMediaPath, absoluteVariantPath, ensureParentDir } from "./paths";
 
 const IMAGE_MIME = new Set(["image/jpeg", "image/png", "image/heic", "image/heif", "image/webp"]);
+const VIDEO_MIME = new Set(["video/mp4", "video/quicktime"]);
 
 export interface ProcessedVariant {
   kind: string;
@@ -19,12 +24,97 @@ export interface ProcessedMedia {
   bytes: number;
   width?: number;
   height?: number;
+  takenAt?: Date;
   variants: ProcessedVariant[];
 }
 
 function extFromFilename(filename: string) {
   const ext = path.extname(filename).replace(/^\./, "").toLowerCase();
   return ext || "bin";
+}
+
+async function generateImageVariants(
+  sourceBuffer: Buffer,
+  albumId: string,
+  mediaId: string,
+): Promise<ProcessedVariant[]> {
+  const env = getEnv();
+  const variants: ProcessedVariant[] = [];
+  for (const size of env.THUMB_SIZES_LIST) {
+    const variantRelative = buildVariantPath(albumId, mediaId, `thumb_${size}`);
+    const variantAbs = absoluteVariantPath(variantRelative);
+    ensureParentDir(variantAbs);
+    const resized = sharp(sourceBuffer, { failOn: "none" }).rotate().resize({ width: size, withoutEnlargement: true }).webp({ quality: 82 });
+    const info = await resized.toFile(variantAbs);
+    variants.push({
+      kind: `thumb_${size}`,
+      path: variantRelative,
+      bytes: info.size,
+      width: info.width,
+      height: info.height,
+    });
+  }
+  return variants;
+}
+
+async function extractImageTakenAt(buffer: Buffer): Promise<Date | undefined> {
+  try {
+    const exif = await exifr.parse(buffer, { pick: ["DateTimeOriginal", "CreateDate"] });
+    const taken = exif?.DateTimeOriginal ?? exif?.CreateDate;
+    return taken instanceof Date && !Number.isNaN(taken.getTime()) ? taken : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function runFfmpeg(args: string[]): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (!ffmpegPath) return reject(new Error("ffmpeg-static binary not found"));
+    execFile(ffmpegPath, args, { maxBuffer: 1024 * 1024 * 10 }, (err, _stdout, stderr) => {
+      // ffmpeg always writes its info/progress to stderr even on success, so don't treat it as failure by itself.
+      if (err && !err.killed) return reject(err);
+      resolve(stderr ?? "");
+    });
+  });
+}
+
+function parseCreationTime(ffmpegStderr: string): Date | undefined {
+  const match = ffmpegStderr.match(/creation_time\s*:\s*([0-9T:.Z-]+)/i);
+  if (!match) return undefined;
+  const parsed = new Date(match[1]);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+}
+
+async function extractVideoFrame(buffer: Buffer, originalFilename: string): Promise<{ frame: Buffer; takenAt?: Date }> {
+  const env = getEnv();
+  const ext = extFromFilename(originalFilename);
+  const tmpIn = path.join(/* turbopackIgnore: true */ env.TEMP_UPLOAD_ROOT, `${randomUUID()}.${ext}`);
+  const tmpOut = path.join(/* turbopackIgnore: true */ env.TEMP_UPLOAD_ROOT, `${randomUUID()}.jpg`);
+  await fs.writeFile(tmpIn, buffer);
+
+  try {
+    // Probe container metadata (creation_time) and grab a frame in one pass; seeking to 1s covers most
+    // clips, falling back to the very first frame for anything shorter.
+    let stderr = "";
+    try {
+      stderr = await runFfmpeg(["-y", "-ss", "00:00:01", "-i", tmpIn, "-frames:v", "1", "-q:v", "3", tmpOut]);
+    } catch {
+      // ignore, retried below if no output file was produced
+    }
+    const gotFrame = await fs
+      .stat(tmpOut)
+      .then((s) => s.size > 0)
+      .catch(() => false);
+    if (!gotFrame) {
+      stderr = await runFfmpeg(["-y", "-i", tmpIn, "-frames:v", "1", "-q:v", "3", tmpOut]);
+    }
+
+    const frame = await fs.readFile(tmpOut);
+    return { frame, takenAt: parseCreationTime(stderr) };
+  } finally {
+    await fs.unlink(tmpIn).catch(() => {});
+    await fs.unlink(tmpOut).catch(() => {});
+  }
 }
 
 export async function processUpload(opts: {
@@ -34,7 +124,6 @@ export async function processUpload(opts: {
   mime: string;
   buffer: Buffer;
 }): Promise<ProcessedMedia> {
-  const env = getEnv();
   const ext = extFromFilename(opts.originalFilename);
   const { relative } = buildMediaPath(opts.albumId, ext);
   const absPath = absoluteMediaPath(relative);
@@ -45,31 +134,29 @@ export async function processUpload(opts: {
 
   if (IMAGE_MIME.has(opts.mime)) {
     try {
-      const image = sharp(opts.buffer, { failOn: "none" });
-      const metadata = await image.metadata();
+      const metadata = await sharp(opts.buffer, { failOn: "none" }).metadata();
       result.width = metadata.width;
       result.height = metadata.height;
-
-      for (const size of env.THUMB_SIZES_LIST) {
-        const variantRelative = buildVariantPath(opts.albumId, opts.mediaId, `thumb_${size}`);
-        const variantAbs = absoluteVariantPath(variantRelative);
-        ensureParentDir(variantAbs);
-        const resized = sharp(opts.buffer, { failOn: "none" }).rotate().resize({ width: size, withoutEnlargement: true }).webp({ quality: 82 });
-        const info = await resized.toFile(variantAbs);
-        result.variants.push({
-          kind: `thumb_${size}`,
-          path: variantRelative,
-          bytes: info.size,
-          width: info.width,
-          height: info.height,
-        });
-      }
+      result.variants = await generateImageVariants(opts.buffer, opts.albumId, opts.mediaId);
     } catch (err) {
       console.error("[media-processing] thumbnail generation failed, keeping original only", err);
     }
+    result.takenAt = await extractImageTakenAt(opts.buffer);
+  } else if (VIDEO_MIME.has(opts.mime)) {
+    // No server-side transcoding of the video itself in this lightweight stack — the original plays
+    // back directly via <video>. We only pull a single frame (for the grid thumbnail) and the
+    // container's creation_time (for day-grouping) via the bundled ffmpeg-static binary.
+    try {
+      const { frame, takenAt } = await extractVideoFrame(opts.buffer, opts.originalFilename);
+      const metadata = await sharp(frame).metadata();
+      result.width = metadata.width;
+      result.height = metadata.height;
+      result.variants = await generateImageVariants(frame, opts.albumId, opts.mediaId);
+      result.takenAt = takenAt;
+    } catch (err) {
+      console.error("[media-processing] video thumbnail generation failed, keeping original only", err);
+    }
   }
-  // video/*: no server-side transcoding in this lightweight stack (no ffmpeg dependency).
-  // Original is kept and played back directly via <video> in the browser.
 
   return result;
 }

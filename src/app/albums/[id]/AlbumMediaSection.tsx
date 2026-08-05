@@ -1,18 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import ShareMenu from "@/components/ShareMenu";
+import DayCard, { type DayMediaItem } from "./DayCard";
 
-interface MediaItem {
-  id: string;
-  originalFilename: string;
-  mime: string;
+interface MediaItem extends DayMediaItem {
   bytes: number;
   createdAt: string;
-  uploader: string;
-  isVideo: boolean;
-  thumbKinds: string[];
+  takenAt: string;
 }
 
 type UploadState = { name: string; status: "pending" | "uploading" | "done" | "error"; message?: string };
@@ -93,11 +88,16 @@ export default function AlbumMediaSection({
     await load();
   }
 
+  // Group by taken-date (EXIF/video creation_time, falling back to upload time) so a photo taken
+  // last week but uploaded today still lands on the day it was actually taken.
   const groups = new Map<string, MediaItem[]>();
   for (const m of media ?? []) {
-    const key = dayKey(m.createdAt);
+    const key = dayKey(m.takenAt ?? m.createdAt);
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key)!.push(m);
+  }
+  for (const items of groups.values()) {
+    items.sort((a, b) => new Date(a.takenAt ?? a.createdAt).getTime() - new Date(b.takenAt ?? b.createdAt).getTime());
   }
 
   return (
@@ -151,48 +151,11 @@ export default function AlbumMediaSection({
       ) : media.length === 0 ? (
         <p className="text-sm text-zinc-500">아직 업로드된 사진이 없습니다.</p>
       ) : (
-        [...groups.entries()].map(([key, items]) => (
-          <div key={key} className="mb-6">
-            <div className="mb-2 flex items-center justify-between">
-              <h2 className="text-sm font-medium text-zinc-500">{dayLabel(key)}</h2>
-              <ShareMenu
-                title={albumTitle}
-                description={`${dayLabel(key)} · 사진 ${items.length}장`}
-                path={`/albums/${albumId}/days/${key}`}
-                compact
-                label="이 날짜 공유"
-              />
-            </div>
-            <div className="grid grid-cols-3 gap-1 sm:grid-cols-4 md:grid-cols-5">
-              {items.map((m) => (
-                <Link
-                  key={m.id}
-                  href={`/albums/${albumId}/media/${m.id}`}
-                  className="relative aspect-square overflow-hidden rounded bg-zinc-200 dark:bg-zinc-800"
-                >
-                  {m.thumbKinds.includes("thumb_800") ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={`/api/media/${m.id}/variant/thumb_800`}
-                      alt={m.originalFilename}
-                      className="h-full w-full object-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-2xl">
-                      {m.isVideo ? "🎬" : "🖼️"}
-                    </div>
-                  )}
-                  {m.isVideo && (
-                    <span className="absolute bottom-1 right-1 rounded bg-black/60 px-1 text-[10px] text-white">
-                      VIDEO
-                    </span>
-                  )}
-                </Link>
-              ))}
-            </div>
-          </div>
-        ))
+        [...groups.entries()]
+          .sort((a, b) => b[0].localeCompare(a[0]))
+          .map(([key, items]) => (
+            <DayCard key={key} albumId={albumId} albumTitle={albumTitle} dayKey={key} dayLabel={dayLabel(key)} items={items} />
+          ))
       )}
 
       {isOwner && <p className="mt-4 text-xs text-zinc-400">사진을 삭제하면 휴지통으로 이동하며, 30일 후 자동으로 완전 삭제됩니다.</p>}

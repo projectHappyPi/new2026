@@ -29,7 +29,14 @@ export default async function AlbumDayPage({ params }: PageProps<"/albums/[id]/d
   const dayEnd = new Date(dayStart.getTime() + 86_400_000);
 
   const media = await prisma.media.findMany({
-    where: { albumId, deletedAt: null, createdAt: { gte: dayStart, lt: dayEnd } },
+    where: {
+      albumId,
+      deletedAt: null,
+      OR: [
+        { takenAt: { gte: dayStart, lt: dayEnd } },
+        { takenAt: null, createdAt: { gte: dayStart, lt: dayEnd } },
+      ],
+    },
     orderBy: { createdAt: "asc" },
     include: { variants: true },
   });
