@@ -67,7 +67,7 @@ export default function StorageDashboard({ thresholds }: { thresholds: { warn: n
   }
 
   async function purgeTrash() {
-    if (!confirm("휴지통을 즉시 비욱니다. 이 작업은 되돌릴 수 없습니다. 계속할까요?")) return;
+    if (!confirm("휴지통을 즉시 비웁니다. 이 작업은 되돌릴 수 없습니다. 계속할까요?")) return;
     setBusy("purge");
     setNotice(null);
     try {
