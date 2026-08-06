@@ -74,6 +74,9 @@ export default function AlbumMediaSection({
       try {
         const form = new FormData();
         form.append("file", file);
+        // Fallback for files with no embedded taken-date metadata (e.g. screenshots, exported
+        // slides) — the browser always knows the local file's last-modified time.
+        form.append("lastModified", String(file.lastModified));
         const res = await fetch(`/api/albums/${albumId}/media`, { method: "POST", body: form });
         if (!res.ok) {
           const data = await res.json();

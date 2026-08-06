@@ -59,8 +59,8 @@ async function generateImageVariants(
 
 async function extractImageTakenAt(buffer: Buffer): Promise<Date | undefined> {
   try {
-    const exif = await exifr.parse(buffer, { pick: ["DateTimeOriginal", "CreateDate"] });
-    const taken = exif?.DateTimeOriginal ?? exif?.CreateDate;
+    const exif = await exifr.parse(buffer, { pick: ["DateTimeOriginal", "CreateDate", "ModifyDate"] });
+    const taken = exif?.DateTimeOriginal ?? exif?.CreateDate ?? exif?.ModifyDate;
     return taken instanceof Date && !Number.isNaN(taken.getTime()) ? taken : undefined;
   } catch {
     return undefined;
@@ -69,10 +69,25 @@ async function extractImageTakenAt(buffer: Buffer): Promise<Date | undefined> {
 
 function runFfmpeg(args: string[]): Promise<string> {
   return new Promise((resolve, reject) => {
-    if (!ffmpegPath) return reject(new Error("ffmpeg-static binary not found"));
+    if (!ffmpegPath) {
+      return reject(
+        new Error(
+          "ffmpeg-static did not resolve a binary path for this platform. Try deleting node_modules/ffmpeg-static and running `npm install` again.",
+        ),
+      );
+    }
     execFile(ffmpegPath, args, { maxBuffer: 1024 * 1024 * 10 }, (err, _stdout, stderr) => {
       // ffmpeg always writes its info/progress to stderr even on success, so don't treat it as failure by itself.
-      if (err && !err.killed) return reject(err);
+      if (err && !err.killed) {
+        if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+          return reject(
+            new Error(
+              `ffmpeg binary not found at ${ffmpegPath}. The ffmpeg-static postinstall step likely failed to download it — try deleting node_modules/ffmpeg-static and running \`npm install\` again.`,
+            ),
+          );
+        }
+        return reject(err);
+      }
       resolve(stderr ?? "");
     });
   });
@@ -123,6 +138,9 @@ export async function processUpload(opts: {
   originalFilename: string;
   mime: string;
   buffer: Buffer;
+  /** Browser-reported File.lastModified — fallback taken-date for files with no embedded metadata
+   * (screenshots, exported slides, etc.) where EXIF/container creation_time extraction finds nothing. */
+  clientLastModified?: Date;
 }): Promise<ProcessedMedia> {
   const ext = extFromFilename(opts.originalFilename);
   const { relative } = buildMediaPath(opts.albumId, ext);
@@ -156,6 +174,10 @@ export async function processUpload(opts: {
     } catch (err) {
       console.error("[media-processing] video thumbnail generation failed, keeping original only", err);
     }
+  }
+
+  if (!result.takenAt && opts.clientLastModified) {
+    result.takenAt = opts.clientLastModified;
   }
 
   return result;

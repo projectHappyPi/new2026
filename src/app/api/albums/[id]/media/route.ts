@@ -34,12 +34,15 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
 
     const mediaId = randomUUID();
     const buffer = Buffer.from(await file.arrayBuffer());
+    const lastModifiedRaw = Number(form.get("lastModified"));
+    const clientLastModified = Number.isFinite(lastModifiedRaw) && lastModifiedRaw > 0 ? new Date(lastModifiedRaw) : undefined;
     const processed = await processUpload({
       albumId,
       mediaId,
       originalFilename: file.name,
       mime: file.type,
       buffer,
+      clientLastModified,
     });
 
     const media = await prisma.media.create({
