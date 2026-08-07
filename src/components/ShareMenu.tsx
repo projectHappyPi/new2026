@@ -76,11 +76,25 @@ export function useShareActions({ title, description, path }: { title: string; d
     logShare();
   }
 
+  async function shareNative(): Promise<boolean> {
+    if (typeof navigator === "undefined" || !navigator.share || !url) return false;
+    try {
+      await navigator.share({ title, text: description, url });
+      logShare();
+      return true;
+    } catch (err) {
+      // AbortError just means the user closed the native share sheet — not a failure to report
+      if (err instanceof Error && err.name === "AbortError") return true;
+      return false;
+    }
+  }
+
   return {
     ready: Boolean(config) && Boolean(config?.shareEnabled),
     kakaoEnabled: Boolean(config?.kakaoEnabled),
     shareKakao,
     copyLink,
+    shareNative,
   };
 }
 
@@ -100,7 +114,7 @@ export default function ShareMenu({
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const { ready, kakaoEnabled, shareKakao, copyLink } = useShareActions({ title, description, path });
+  const { ready, kakaoEnabled, shareKakao, copyLink, shareNative } = useShareActions({ title, description, path });
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -115,7 +129,10 @@ export default function ShareMenu({
   return (
     <div className="relative" ref={ref}>
       <button
-        onClick={() => setOpen((v) => !v)}
+        onClick={async () => {
+          const handledNatively = await shareNative();
+          if (!handledNatively) setOpen((v) => !v);
+        }}
         className={
           compact
             ? "text-xs text-zinc-500 underline"

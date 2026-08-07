@@ -67,7 +67,7 @@ async function runStorageCheck() {
         const pct = status.percent.toFixed(1);
         await sendMail({
           to: env.ADMIN_ALERT_EMAIL,
-          subject: `[베베로그] 스토리지 ${status.level.toUpperCase()} - 사용률 ${pct}%`,
+          subject: `[Pickle] 스토리지 ${status.level.toUpperCase()} - 사용률 ${pct}%`,
           text: `현재 스토리지 사용률이 ${pct}% 로 '${status.level}' 단계에 도달했습니다.\n사용량: ${status.used} / ${status.quota} bytes\n여유공간: ${status.free} bytes`,
         });
       }

@@ -32,6 +32,7 @@ export async function GET() {
       owner: m.album.owner.nickname,
       role: m.role,
       mediaCount: m.album._count.media,
+      coverMediaId: m.album.coverMediaId,
       createdAt: m.album.createdAt,
     }));
 

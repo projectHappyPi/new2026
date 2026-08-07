@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/auth";
 import InviteBox from "./InviteBox";
@@ -24,6 +25,8 @@ export default async function AlbumDetailPage({ params }: PageProps<"/albums/[id
 
   const isOwner = album.ownerId === user.id;
 
+  await prisma.accessLog.create({ data: { userId: user.id, albumId: album.id, action: "view" } }).catch(() => {});
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
@@ -33,6 +36,11 @@ export default async function AlbumDetailPage({ params }: PageProps<"/albums/[id
           <p className="mt-1 text-xs text-zinc-500">
             개설자 {album.owner.nickname} · 멤버 {album.members.length}명
           </p>
+          {isOwner && (
+            <Link href={`/albums/${album.id}/activity`} className="mt-1 inline-block text-xs text-amber-600 underline dark:text-amber-400">
+              활동 기록 보기
+            </Link>
+          )}
         </div>
         {isOwner && (
           <div className="w-full sm:w-72">

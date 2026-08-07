@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import AppIcon from "@/components/AppIcon";
+import KakaoStartButton from "@/components/KakaoStartButton";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -36,7 +38,18 @@ export default function RegisterPage() {
 
   return (
     <div className="mx-auto flex max-w-sm flex-col gap-6 px-4 py-16">
-      <h1 className="text-2xl font-semibold">회원가입</h1>
+      <div className="flex flex-col items-center gap-3 text-center">
+        <AppIcon size={64} />
+        <h1 className="text-2xl font-semibold">회원가입</h1>
+      </div>
+
+      <KakaoStartButton next="/albums" label="카카오로 시작하기" />
+      <div className="flex items-center gap-3 text-xs text-zinc-400">
+        <span className="h-px flex-1 bg-black/10 dark:bg-white/10" />
+        또는 이메일로 가입
+        <span className="h-px flex-1 bg-black/10 dark:bg-white/10" />
+      </div>
+
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
         <input
           type="text"

@@ -1,0 +1,30 @@
+export default function AppIcon({ size = 72 }: { size?: number }) {
+  return (
+    <div
+      style={{ width: size, height: size, borderRadius: size * 0.28 }}
+      className="overflow-hidden shadow-[0_10px_22px_-10px_rgba(0,0,0,0.55)]"
+    >
+      <svg viewBox="0 0 200 200" width="100%" height="100%" role="img" aria-label="Pickle 아이콘">
+        <rect width="200" height="200" fill="#F9F5EA" />
+        <rect x="18" y="14" width="164" height="118" rx="20" fill="#F3ECDB" stroke="#17140F" strokeWidth="6" />
+        <circle cx="52" cy="42" r="13" fill="#413E46" stroke="#17140F" strokeWidth="5" />
+        <circle cx="48" cy="68" r="7" fill="#E5433D" stroke="#17140F" strokeWidth="3" />
+        <rect x="148" y="28" width="26" height="16" rx="4" fill="none" stroke="#17140F" strokeWidth="5" />
+        <circle cx="117" cy="76" r="38" fill="#DCD9D2" stroke="#17140F" strokeWidth="6" />
+        <circle cx="117" cy="76" r="29" fill="#4B4850" stroke="#17140F" strokeWidth="5" />
+        <circle cx="117" cy="76" r="19" fill="#141218" />
+        <circle cx="109" cy="68" r="5" fill="#34313A" />
+        <rect x="24" y="108" width="152" height="24" rx="6" fill="#2D2A32" />
+        <rect x="96" y="110" width="11" height="22" fill="#E5433D" />
+        <rect x="107" y="110" width="11" height="22" fill="#F2A73B" />
+        <rect x="118" y="110" width="11" height="22" fill="#5C9E5A" />
+        <rect x="129" y="110" width="11" height="22" fill="#4E86C4" />
+        <rect x="58" y="126" width="84" height="66" rx="4" fill="#FBF8F1" stroke="#17140F" strokeWidth="5" />
+        <circle cx="100" cy="160" r="22" fill="#F6D627" stroke="#17140F" strokeWidth="4.5" />
+        <rect x="90" y="153" width="5" height="11" rx="2.5" fill="#17140F" />
+        <rect x="105" y="153" width="5" height="11" rx="2.5" fill="#17140F" />
+        <path d="M89 166 Q100 178 111 166" stroke="#17140F" strokeWidth="4.5" fill="none" strokeLinecap="round" />
+      </svg>
+    </div>
+  );
+}

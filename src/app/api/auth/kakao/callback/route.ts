@@ -45,14 +45,17 @@ export async function GET(req: NextRequest) {
     const nickname = profile.kakao_account?.profile?.nickname ?? `카카오사용자${kakaoId.slice(-4)}`;
 
     let user = await prisma.user.findUnique({ where: { kakaoId } });
+    let isNewUser = false;
     if (!user) {
+      isNewUser = true;
       const userCount = await prisma.user.count();
       const role = userCount === 0 || isAdminIdentity({ kakaoId }) ? "admin" : "member";
-      user = await prisma.user.create({ data: { kakaoId, nickname, role } });
+      user = await prisma.user.create({ data: { kakaoId, nickname, role, onboarded: false } });
     }
 
     await setSessionCookie(user.id, user.role);
-    return NextResponse.redirect(new URL(next, env.APP_BASE_URL));
+    const redirectTo = isNewUser ? `/onboarding/nickname?next=${encodeURIComponent(next)}` : next;
+    return NextResponse.redirect(new URL(redirectTo, env.APP_BASE_URL));
   } catch (err) {
     console.error("[kakao-callback]", err);
     return NextResponse.redirect(new URL(`/login?error=kakao_failed`, env.APP_BASE_URL));

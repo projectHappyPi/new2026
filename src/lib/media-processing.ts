@@ -59,10 +59,18 @@ async function generateImageVariants(
 
 async function extractImageTakenAt(buffer: Buffer): Promise<Date | undefined> {
   try {
-    const exif = await exifr.parse(buffer, { pick: ["DateTimeOriginal", "CreateDate", "ModifyDate"] });
+    // Some re-saved/re-shared JPEGs (e.g. messenger apps) keep the capture date only in the XMP
+    // packet rather than classic EXIF tags — exifr only reads XMP when explicitly enabled.
+    const exif = await exifr.parse(buffer, {
+      pick: ["DateTimeOriginal", "CreateDate", "ModifyDate"],
+      xmp: true,
+    });
     const taken = exif?.DateTimeOriginal ?? exif?.CreateDate ?? exif?.ModifyDate;
-    return taken instanceof Date && !Number.isNaN(taken.getTime()) ? taken : undefined;
-  } catch {
+    if (taken instanceof Date && !Number.isNaN(taken.getTime())) return taken;
+    console.warn("[media-processing] no usable taken-date tag found in EXIF/XMP, falling back to file lastModified");
+    return undefined;
+  } catch (err) {
+    console.warn("[media-processing] EXIF/XMP parse failed, falling back to file lastModified", err);
     return undefined;
   }
 }

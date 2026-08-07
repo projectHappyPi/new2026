@@ -18,7 +18,7 @@ export async function ensureShareCoverImage() {
     <svg width="800" height="400" xmlns="http://www.w3.org/2000/svg">
       <rect width="100%" height="100%" fill="#FEE500"/>
       <circle cx="400" cy="150" r="70" fill="#3C1E1E"/>
-      <text x="50%" y="300" font-size="56" font-family="sans-serif" font-weight="bold" fill="#3C1E1E" text-anchor="middle">BebeLog 베베로그</text>
+      <text x="50%" y="300" font-size="56" font-family="sans-serif" font-weight="bold" fill="#3C1E1E" text-anchor="middle">Pickle</text>
     </svg>
   `;
 

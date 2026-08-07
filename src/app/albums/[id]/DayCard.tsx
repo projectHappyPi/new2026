@@ -59,6 +59,7 @@ export default function DayCard({
   const [commentText, setCommentText] = useState("");
   const [posting, setPosting] = useState(false);
   const [showComments, setShowComments] = useState(false);
+  const [dayReaction, setDayReaction] = useState<{ reactionCounts: Record<string, number>; myReaction: string | null } | null>(null);
 
   const loadComments = useCallback(async () => {
     const res = await fetch(`/api/albums/${albumId}/days/${dayKey}/comments`);
@@ -74,6 +75,23 @@ export default function DayCard({
       loadComments();
     }
   }, [showComments, comments, loadComments]);
+
+  useEffect(() => {
+    fetch(`/api/albums/${albumId}/days/${dayKey}/reactions`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => data && setDayReaction(data))
+      .catch(() => {});
+  }, [albumId, dayKey]);
+
+  async function toggleDayReaction(type: string) {
+    const method = dayReaction?.myReaction === type ? "DELETE" : "POST";
+    const res = await fetch(`/api/albums/${albumId}/days/${dayKey}/reactions`, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: method === "POST" ? JSON.stringify({ type }) : undefined,
+    });
+    if (res.ok) setDayReaction(await res.json());
+  }
 
   async function submitComment(e: React.FormEvent) {
     e.preventDefault();
@@ -102,13 +120,6 @@ export default function DayCard({
   const small1 = items[1];
   const small2 = items[2];
   const extraCount = items.length > 3 ? items.length - 2 : 0;
-
-  const totals: Record<string, number> = {};
-  for (const item of items) {
-    for (const [type, count] of Object.entries(item.reactionCounts)) {
-      totals[type] = (totals[type] ?? 0) + count;
-    }
-  }
   const uploader = big?.uploader;
 
   return (
@@ -146,13 +157,25 @@ export default function DayCard({
       )}
 
       <div className="flex flex-col gap-2 px-3 py-3">
-        <div className="flex flex-wrap items-center gap-3 text-sm">
-          {REACTION_TYPES.filter((t) => (totals[t] ?? 0) > 0).map((t) => (
-            <span key={t} className="flex items-center gap-1 text-zinc-600 dark:text-zinc-400">
-              <span>{REACTION_META[t].emoji}</span>
-              <span className="text-xs">{totals[t]}</span>
-            </span>
-          ))}
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          {REACTION_TYPES.map((t) => {
+            const count = dayReaction?.reactionCounts[t] ?? 0;
+            const mine = dayReaction?.myReaction === t;
+            return (
+              <button
+                key={t}
+                onClick={() => toggleDayReaction(t)}
+                className={`flex items-center gap-1 rounded-full border px-2 py-1 text-xs ${
+                  mine
+                    ? "border-transparent bg-amber-400 text-black"
+                    : "border-black/10 text-zinc-600 hover:bg-black/5 dark:border-white/10 dark:text-zinc-400 dark:hover:bg-white/10"
+                }`}
+              >
+                <span>{REACTION_META[t].emoji}</span>
+                {count > 0 && <span>{count}</span>}
+              </button>
+            );
+          })}
           <button onClick={() => setShowComments((v) => !v)} className="flex items-center gap-1 text-zinc-500 hover:underline">
             💬 <span className="text-xs">{comments?.length ?? ""} 댓글</span>
           </button>

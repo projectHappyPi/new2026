@@ -14,14 +14,16 @@ model User {
   kakaoId      String?  @unique
   nickname     String
   role         String   @default("member") // member | admin
+  onboarded    Boolean  @default(true) // false only for a Kakao signup that hasn't set its nickname yet
   createdAt    DateTime @default(now())
 
-  ownedAlbums Album[]       @relation("AlbumOwner")
-  memberships AlbumMember[]
-  uploads     Media[]
-  accessLogs  AccessLog[]
-  reactions   Reaction[]
-  comments    Comment[]
+  ownedAlbums  Album[]       @relation("AlbumOwner")
+  memberships  AlbumMember[]
+  uploads      Media[]
+  accessLogs   AccessLog[]
+  reactions    Reaction[]
+  dayReactions DayReaction[]
+  comments     Comment[]
 
   @@map("users")
 }
@@ -36,10 +38,11 @@ model Album {
   shareEnabled Boolean  @default(false)
   createdAt    DateTime @default(now())
 
-  members  AlbumMember[]
-  media    Media[]
-  invites  Invite[]
-  comments Comment[]
+  members      AlbumMember[]
+  media        Media[]
+  invites      Invite[]
+  comments     Comment[]
+  dayReactions DayReaction[]
 
   @@map("albums")
 }
@@ -103,6 +106,20 @@ model Reaction {
 
   @@unique([mediaId, userId])
   @@map("reactions")
+}
+
+model DayReaction {
+  id        String   @id @default(cuid())
+  albumId   String
+  album     Album    @relation(fields: [albumId], references: [id])
+  dayKey    String // yyyy-mm-dd, same key as the media day grouping
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String // like | cute | funny | wow
+  createdAt DateTime @default(now())
+
+  @@unique([albumId, dayKey, userId])
+  @@map("day_reactions")
 }
 
 model Comment {
