@@ -12,6 +12,33 @@ const createSchema = z.object({
 export async function GET() {
   try {
     const user = await requireUser();
+
+    if (user.role === "admin") {
+      // Admins can browse every album, not just the ones they've personally joined — membership
+      // (if any) is looked up per-album so their real role still shows when they are a member.
+      const allAlbums = await prisma.album.findMany({
+        include: {
+          owner: { select: { nickname: true } },
+          _count: { select: { media: { where: { deletedAt: null } } } },
+          members: { where: { userId: user.id }, select: { role: true } },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      const albums = allAlbums.map((a) => ({
+        id: a.id,
+        title: a.title,
+        description: a.description,
+        owner: a.owner.nickname,
+        role: a.members[0]?.role ?? "admin",
+        mediaCount: a._count.media,
+        coverMediaId: a.coverMediaId,
+        createdAt: a.createdAt,
+      }));
+
+      return NextResponse.json({ albums });
+    }
+
     const memberships = await prisma.albumMember.findMany({
       where: { userId: user.id },
       include: {

@@ -151,7 +151,8 @@ export default function AlbumsPage() {
                   <div>
                     <div className="font-medium">{a.title}</div>
                     <div className="text-xs text-zinc-500">
-                      {a.owner} · {a.mediaCount}개 · {a.role === "owner" ? "개설자" : "멤버"}
+                      {a.owner} · {a.mediaCount}개 ·{" "}
+                      {a.role === "owner" ? "개설자" : a.role === "admin" ? "관리자 열람" : "멤버"}
                     </div>
                   </div>
                 </div>
