@@ -1,0 +1,183 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String?  @unique
+  passwordHash String?
+  kakaoId      String?  @unique
+  nickname     String   @unique
+  role         String   @default("member") // member | admin
+  onboarded    Boolean  @default(true) // false only for a Kakao signup that hasn't set its nickname yet
+  createdAt    DateTime @default(now())
+
+  ownedAlbums  Album[]       @relation("AlbumOwner")
+  memberships  AlbumMember[]
+  uploads      Media[]
+  accessLogs   AccessLog[]
+  reactions    Reaction[]
+  dayReactions DayReaction[]
+  comments     Comment[]
+
+  @@map("users")
+}
+
+model Album {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  ownerId      String
+  owner        User     @relation("AlbumOwner", fields: [ownerId], references: [id])
+  coverMediaId String?
+  shareEnabled Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  members      AlbumMember[]
+  media        Media[]
+  invites      Invite[]
+  comments     Comment[]
+  dayReactions DayReaction[]
+
+  @@map("albums")
+}
+
+model AlbumMember {
+  id       String   @id @default(cuid())
+  albumId  String
+  album    Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  role     String   @default("member") // owner | member
+  joinedAt DateTime @default(now())
+
+  @@unique([albumId, userId])
+  @@map("album_members")
+}
+
+model Media {
+  id               String    @id @default(cuid())
+  albumId          String
+  album            Album     @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  uploaderId       String
+  uploader         User      @relation(fields: [uploaderId], references: [id])
+  originalFilename String
+  mime             String
+  bytes            BigInt
+  width            Int?
+  height           Int?
+  path             String
+  takenAt          DateTime?
+  createdAt        DateTime  @default(now())
+  deletedAt        DateTime?
+
+  variants  MediaVariant[]
+  reactions Reaction[]
+
+  @@map("media")
+}
+
+model MediaVariant {
+  id      String @id @default(cuid())
+  mediaId String
+  media   Media  @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  kind    String // thumb_200 | thumb_800 | thumb_1600
+  bytes   BigInt
+  path    String
+  width   Int?
+  height  Int?
+
+  @@map("media_variants")
+}
+
+model Reaction {
+  id        String   @id @default(cuid())
+  mediaId   String
+  media     Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String // like | cute | funny | wow
+  createdAt DateTime @default(now())
+
+  @@unique([mediaId, userId])
+  @@map("reactions")
+}
+
+model DayReaction {
+  id        String   @id @default(cuid())
+  albumId   String
+  album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  dayKey    String // yyyy-mm-dd, same key as the media day grouping
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  type      String // like | cute | funny | wow
+  createdAt DateTime @default(now())
+
+  @@unique([albumId, dayKey, userId])
+  @@map("day_reactions")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  albumId   String
+  album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  dayKey    String // yyyy-mm-dd, groups comments onto a timeline day-card (same key as the media day grouping)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([albumId, dayKey])
+  @@map("comments")
+}
+
+model Invite {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  albumId   String
+  album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  maxUses   Int
+  useCount  Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@map("invites")
+}
+
+model StorageStats {
+  id         String   @id @default(cuid())
+  date       String   @unique // yyyy-mm-dd
+  usedBytes  BigInt
+  freeBytes  BigInt
+  totalBytes BigInt
+  level      String
+  createdAt  DateTime @default(now())
+
+  @@map("storage_stats")
+}
+
+model AccessLog {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  albumId   String?
+  mediaId   String?
+  action    String // view | share | download | join | upload
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@map("access_logs")
+}
+
+model SystemFlag {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("system_flags")
+}
