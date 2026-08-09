@@ -12,7 +12,7 @@ model User {
   email        String?  @unique
   passwordHash String?
   kakaoId      String?  @unique
-  nickname     String
+  nickname     String   @unique
   role         String   @default("member") // member | admin
   onboarded    Boolean  @default(true) // false only for a Kakao signup that hasn't set its nickname yet
   createdAt    DateTime @default(now())

@@ -21,12 +21,17 @@ export async function POST(req: NextRequest) {
       throw new ApiError(409, "EMAIL_TAKEN", "이미 가입된 이메일입니다");
     }
 
-    const userCount = await prisma.user.count();
-    const passwordHash = await bcrypt.hash(body.password, 10);
-    const role = userCount === 0 || isAdminIdentity({ email }) ? "admin" : "member";
     // Nickname is optional at signup — an empty one just shows the email until they set a
     // real nickname later from settings, rather than blocking registration on it.
     const nickname = body.nickname?.trim() || email;
+    const nicknameTaken = await prisma.user.findUnique({ where: { nickname } });
+    if (nicknameTaken) {
+      throw new ApiError(409, "NICKNAME_TAKEN", "이미 사용 중인 닉네임입니다");
+    }
+
+    const userCount = await prisma.user.count();
+    const passwordHash = await bcrypt.hash(body.password, 10);
+    const role = userCount === 0 || isAdminIdentity({ email }) ? "admin" : "member";
 
     const user = await prisma.user.create({
       data: { email, passwordHash, nickname, role },
