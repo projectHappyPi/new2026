@@ -53,8 +53,7 @@ export default function RegisterPage() {
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
         <input
           type="text"
-          required
-          placeholder="닉네임"
+          placeholder="닉네임 (선택, 비워두면 이메일로 표시돼요)"
           value={nickname}
           onChange={(e) => setNickname(e.target.value)}
           className="rounded border border-black/15 bg-transparent px-3 py-2 dark:border-white/20"

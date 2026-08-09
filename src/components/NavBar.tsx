@@ -15,14 +15,16 @@ export default async function NavBar() {
           {user ? (
             <>
               <Link href="/albums" className="hover:underline">
-                사진첩
+                {user.role === "admin" ? "전체 사진첩" : "사진첩"}
               </Link>
               {user.role === "admin" && (
                 <Link href="/admin/storage" className="hover:underline">
                   관리자
                 </Link>
               )}
-              <span className="text-zinc-500">{user.nickname}</span>
+              <Link href="/settings" className="text-zinc-500 hover:underline">
+                {user.nickname}
+              </Link>
               <LogoutButton />
             </>
           ) : (

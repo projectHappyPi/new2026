@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/auth";
 import InviteBox from "./InviteBox";
 import AlbumMediaSection from "./AlbumMediaSection";
+import AlbumOwnerPanel from "./AlbumOwnerPanel";
 
 export default async function AlbumDetailPage({ params }: PageProps<"/albums/[id]">) {
   const { id } = await params;
@@ -19,7 +20,7 @@ export default async function AlbumDetailPage({ params }: PageProps<"/albums/[id
 
   const album = await prisma.album.findUnique({
     where: { id },
-    include: { owner: { select: { nickname: true } }, members: { include: { user: { select: { nickname: true } } } } },
+    include: { owner: { select: { nickname: true } }, members: { include: { user: { select: { id: true, nickname: true } } } } },
   });
   if (!album) notFound();
 
@@ -48,6 +49,13 @@ export default async function AlbumDetailPage({ params }: PageProps<"/albums/[id
           </div>
         )}
       </div>
+
+      {isOwner && (
+        <AlbumOwnerPanel
+          albumId={album.id}
+          members={album.members.filter((m) => m.user.id !== album.ownerId).map((m) => ({ id: m.user.id, nickname: m.user.nickname }))}
+        />
+      )}
 
       <AlbumMediaSection albumId={album.id} isOwner={isOwner} coverMediaId={album.coverMediaId} albumTitle={album.title} />
     </div>

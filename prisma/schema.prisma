@@ -50,7 +50,7 @@ model Album {
 model AlbumMember {
   id       String   @id @default(cuid())
   albumId  String
-  album    Album    @relation(fields: [albumId], references: [id])
+  album    Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
   userId   String
   user     User     @relation(fields: [userId], references: [id])
   role     String   @default("member") // owner | member
@@ -63,7 +63,7 @@ model AlbumMember {
 model Media {
   id               String    @id @default(cuid())
   albumId          String
-  album            Album     @relation(fields: [albumId], references: [id])
+  album            Album     @relation(fields: [albumId], references: [id], onDelete: Cascade)
   uploaderId       String
   uploader         User      @relation(fields: [uploaderId], references: [id])
   originalFilename String
@@ -85,7 +85,7 @@ model Media {
 model MediaVariant {
   id      String @id @default(cuid())
   mediaId String
-  media   Media  @relation(fields: [mediaId], references: [id])
+  media   Media  @relation(fields: [mediaId], references: [id], onDelete: Cascade)
   kind    String // thumb_200 | thumb_800 | thumb_1600
   bytes   BigInt
   path    String
@@ -98,7 +98,7 @@ model MediaVariant {
 model Reaction {
   id        String   @id @default(cuid())
   mediaId   String
-  media     Media    @relation(fields: [mediaId], references: [id])
+  media     Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
   userId    String
   user      User     @relation(fields: [userId], references: [id])
   type      String // like | cute | funny | wow
@@ -111,7 +111,7 @@ model Reaction {
 model DayReaction {
   id        String   @id @default(cuid())
   albumId   String
-  album     Album    @relation(fields: [albumId], references: [id])
+  album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
   dayKey    String // yyyy-mm-dd, same key as the media day grouping
   userId    String
   user      User     @relation(fields: [userId], references: [id])
@@ -125,7 +125,7 @@ model DayReaction {
 model Comment {
   id        String   @id @default(cuid())
   albumId   String
-  album     Album    @relation(fields: [albumId], references: [id])
+  album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
   dayKey    String // yyyy-mm-dd, groups comments onto a timeline day-card (same key as the media day grouping)
   userId    String
   user      User     @relation(fields: [userId], references: [id])
@@ -140,7 +140,7 @@ model Invite {
   id        String   @id @default(cuid())
   token     String   @unique
   albumId   String
-  album     Album    @relation(fields: [albumId], references: [id])
+  album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   maxUses   Int
   useCount  Int      @default(0)

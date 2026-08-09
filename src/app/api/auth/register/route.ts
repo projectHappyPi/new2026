@@ -8,7 +8,7 @@ import { handleApiError, ApiError } from "@/lib/api-error";
 const bodySchema = z.object({
   email: z.string().email(),
   password: z.string().min(8, "비밀번호는 8자 이상이어야 합니다"),
-  nickname: z.string().min(1).max(30),
+  nickname: z.string().max(30).optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -24,9 +24,12 @@ export async function POST(req: NextRequest) {
     const userCount = await prisma.user.count();
     const passwordHash = await bcrypt.hash(body.password, 10);
     const role = userCount === 0 || isAdminIdentity({ email }) ? "admin" : "member";
+    // Nickname is optional at signup — an empty one just shows the email until they set a
+    // real nickname later from settings, rather than blocking registration on it.
+    const nickname = body.nickname?.trim() || email;
 
     const user = await prisma.user.create({
-      data: { email, passwordHash, nickname: body.nickname, role },
+      data: { email, passwordHash, nickname, role },
     });
 
     await setSessionCookie(user.id, user.role);
