@@ -4,14 +4,17 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/time/time_format.dart';
 import '../../data/db/seed.dart';
 import '../../data/models/settings.dart';
 import '../../providers/activity_provider.dart';
+import '../../providers/baby_profile_provider.dart';
 import '../../providers/settings_provider.dart';
 
 /// 9절 설정 화면. 여기서 바꾼 값은 홈 궤적·시트 정렬·스와이프 방향·테마에
@@ -38,6 +41,8 @@ class SettingsScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 24),
         children: [
+          const _SectionHeader('아기 정보'),
+          const _BabyInfoRow(),
           const _SectionHeader('입력'),
           _SwitchRow(
             label: '한손 입력 모드',
@@ -204,6 +209,172 @@ class SettingsScreen extends ConsumerWidget {
     FormulaMode.recent => '최근값',
     FormulaMode.timeOfDay => '시간대별',
   };
+}
+
+/// 아기 정보(이름·생년월일·사진). 사진은 갤러리에서 골라 앱 문서 폴더로
+/// 복사해두므로 온보딩·설정·로딩 화면에서 언제든 같은 경로로 보여줄 수 있다.
+class _BabyInfoRow extends ConsumerWidget {
+  const _BabyInfoRow();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final profile = ref.watch(babyProfileProvider);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => _showPhotoSheet(context, ref),
+            child: Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colors.surfaceVariant,
+                border: Border.all(color: colors.outline),
+                image: profile.photoPath != null
+                    ? DecorationImage(
+                        image: FileImage(File(profile.photoPath!)),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              alignment: Alignment.center,
+              child: profile.photoPath == null
+                  ? Icon(
+                      Icons.add_a_photo_outlined,
+                      size: 20,
+                      color: colors.onSurfaceVariant,
+                    )
+                  : null,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                InkWell(
+                  onTap: () => _editName(context, ref, profile.name ?? ''),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        profile.name?.isNotEmpty == true
+                            ? profile.name!
+                            : '이름 없음',
+                        style: AppTypography.body.copyWith(
+                          color: colors.onSurface,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Icon(Icons.edit_outlined, size: 14, color: colors.muted),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                InkWell(
+                  onTap: () => _editBirthDate(context, ref, profile.birthDate),
+                  child: Text(
+                    profile.birthDate != null
+                        ? '${md(profile.birthDate!)} 생'
+                        : '생년월일 설정',
+                    style: AppTypography.label.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _editName(
+    BuildContext context,
+    WidgetRef ref,
+    String current,
+  ) async {
+    final ctrl = TextEditingController(text: current);
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('이름 수정'),
+        content: TextField(controller: ctrl, autofocus: true),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+            child: const Text('저장'),
+          ),
+        ],
+      ),
+    );
+    if (result != null && result.isNotEmpty && context.mounted) {
+      ref.read(babyProfileProvider.notifier).setName(result);
+    }
+  }
+
+  Future<void> _editBirthDate(
+    BuildContext context,
+    WidgetRef ref,
+    DateTime? current,
+  ) async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: current ?? now,
+      firstDate: DateTime(now.year - 5),
+      lastDate: now,
+    );
+    if (picked != null) {
+      ref.read(babyProfileProvider.notifier).setBirthDate(picked);
+    }
+  }
+
+  Future<void> _showPhotoSheet(BuildContext context, WidgetRef ref) async {
+    final hasPhoto = ref.read(babyProfileProvider).photoPath != null;
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text('갤러리에서 선택'),
+              onTap: () => Navigator.pop(ctx, 'pick'),
+            ),
+            if (hasPhoto)
+              ListTile(
+                leading: const Icon(Icons.delete_outline_rounded),
+                title: const Text('사진 삭제'),
+                onTap: () => Navigator.pop(ctx, 'clear'),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (!context.mounted) return;
+    final notifier = ref.read(babyProfileProvider.notifier);
+    if (action == 'pick') {
+      final picked = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 85,
+      );
+      if (picked != null) await notifier.setPhotoFromPath(picked.path);
+    } else if (action == 'clear') {
+      await notifier.clearPhoto();
+    }
+  }
 }
 
 class _SectionHeader extends StatelessWidget {

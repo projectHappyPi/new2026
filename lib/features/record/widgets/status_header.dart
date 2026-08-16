@@ -8,20 +8,8 @@ import '../../../core/time/time_format.dart';
 import '../../../data/models/activity.dart';
 import '../../../data/models/activity_type.dart';
 import '../../../providers/activity_provider.dart';
+import '../../../providers/baby_profile_provider.dart';
 import '../../../providers/running_provider.dart';
-import '../../../providers/settings_provider.dart';
-
-const _kBabyBirthDateKey = 'babyBirthDateEpoch';
-const _kBabyName = '튼튼이';
-
-DateTime _babyBirthDate(WidgetRef ref) {
-  final prefs = ref.read(sharedPreferencesProvider);
-  final stored = prefs.getInt(_kBabyBirthDateKey);
-  if (stored != null) return DateTime.fromMillisecondsSinceEpoch(stored);
-  final fallback = DateTime.now().subtract(const Duration(days: 199));
-  prefs.setInt(_kBabyBirthDateKey, fallback.millisecondsSinceEpoch);
-  return fallback;
-}
 
 /// 수유 대표 시각: 분유는 즉시 기록 시각, 모유는 끝났으면 종료 시각, 진행 중이면 시작 시각.
 DateTime _feedingRef(Activity a) =>
@@ -86,11 +74,11 @@ class StatusHeader extends ConsumerWidget {
     final today =
         ref.watch(todayActivitiesProvider).valueOrNull ?? const <Activity>[];
     final now = ref.watch(nowTickerProvider).valueOrNull ?? DateTime.now();
-
-    final birthDate = _babyBirthDate(ref);
-    final dPlus = DateTime(now.year, now.month, now.day)
-        .difference(DateTime(birthDate.year, birthDate.month, birthDate.day))
-        .inDays;
+    final profile = ref.watch(babyProfileProvider);
+    // 온보딩이 먼저 이름·생년월일을 강제하므로 이 시점엔 항상 값이 있다.
+    final ageLabel = profile.birthDate != null
+        ? babyAgeLabel(profile.birthDate!, now)
+        : '';
 
     final lastFeeding = _lastFeeding(recent);
     final elapsed = lastFeeding == null
@@ -114,14 +102,22 @@ class StatusHeader extends ConsumerWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              _kBabyName,
-              style: AppTypography.title.copyWith(color: colors.onSurface),
+            Flexible(
+              child: Text(
+                profile.name ?? '',
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.title.copyWith(color: colors.onSurface),
+              ),
             ),
-            Text(
-              'D+$dPlus',
-              style: AppTypography.mono.tabular.copyWith(
-                color: colors.onSurfaceVariant,
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                ageLabel,
+                textAlign: TextAlign.right,
+                overflow: TextOverflow.ellipsis,
+                style: AppTypography.mono.tabular.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
               ),
             ),
           ],
