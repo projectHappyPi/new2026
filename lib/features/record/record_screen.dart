@@ -64,7 +64,18 @@ class _RecordScreenState extends ConsumerState<RecordScreen> {
       if (running != null && running.type == type) {
         saved = await actions.endRunning(running);
       } else {
-        saved = await actions.startRange(type);
+        final now = DateTime.now();
+        // 짧은 탭엔 다이얼로그가 없으므로 수면은 시간대로 낮잠/밤잠을 자동 분류한다
+        // (18시 이전·18~20시는 낮잠, 20시 이후는 밤잠). 애매한 구간을 밤잠으로
+        // 바꾸고 싶으면 길게 눌러 상세 시트에서 선택한다.
+        final payload = type == ActivityType.sleep
+            ? {'period': defaultSleepPeriod(now).name}
+            : const <String, dynamic>{};
+        saved = await actions.startRange(
+          type,
+          startedAt: now,
+          payload: payload,
+        );
       }
     } else {
       saved = await actions.quickSaveInstant(type);

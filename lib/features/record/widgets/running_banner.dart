@@ -23,6 +23,9 @@ class RunningBanner extends ConsumerWidget {
     final color = context.activityColors.forActivity(running);
     final now = ref.watch(nowTickerProvider).valueOrNull ?? DateTime.now();
     final elapsed = running.elapsed(now);
+    final periodSuffix = running.sleepPeriod != null
+        ? ' · ${running.sleepPeriod!.label}'
+        : '';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -37,7 +40,7 @@ class RunningBanner extends ConsumerWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              '${running.type.label} 기록 중  ${dur(elapsed)}',
+              '${running.type.label}$periodSuffix 기록 중  ${dur(elapsed)}',
               style: AppTypography.body.tabular.copyWith(
                 color: colors.onSurface,
               ),

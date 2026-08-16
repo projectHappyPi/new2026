@@ -46,6 +46,7 @@ class _DetailSheetState extends ConsumerState<DetailSheet> {
   int _startOffsetMinutes = 0;
   DateTime? _editStartedAt;
   DateTime? _editEndedAt;
+  SleepPeriod? _sleepPeriod;
 
   bool get _isEditing => widget.editing != null;
 
@@ -62,6 +63,7 @@ class _DetailSheetState extends ConsumerState<DetailSheet> {
     _solidNoteCtrl = TextEditingController(text: e?.note ?? '');
     _editStartedAt = e?.startedAt;
     _editEndedAt = e?.endedAt;
+    _sleepPeriod = e?.sleepPeriod;
 
     if (!_isEditing && widget.type == ActivityType.formula) {
       Future.microtask(() async {
@@ -109,6 +111,26 @@ class _DetailSheetState extends ConsumerState<DetailSheet> {
         if (note.isNotEmpty) payload['note'] = note;
         result = await _persist(actions, payload);
       case ActivityType.sleep:
+        if (_isEditing) {
+          final period =
+              _sleepPeriod ??
+              widget.editing!.sleepPeriod ??
+              defaultSleepPeriod(_editStartedAt ?? widget.editing!.startedAt);
+          result = await _persist(actions, {
+            ...widget.editing!.payload,
+            'period': period.name,
+          });
+        } else {
+          final startedAt = DateTime.now().subtract(
+            Duration(minutes: _startOffsetMinutes),
+          );
+          final period = _sleepPeriod ?? defaultSleepPeriod(startedAt);
+          result = await actions.startRange(
+            widget.type,
+            startedAt: startedAt,
+            payload: {'period': period.name},
+          );
+        }
       case ActivityType.breast:
         if (_isEditing) {
           result = await _persist(actions, widget.editing!.payload);
@@ -217,6 +239,9 @@ class _DetailSheetState extends ConsumerState<DetailSheet> {
       case ActivityType.solid:
         return _buildSolid(context);
       case ActivityType.sleep:
+        return _isEditing
+            ? _buildSleepPeriodEditor(context)
+            : _buildRangeStart(context);
       case ActivityType.breast:
         return _isEditing ? const SizedBox.shrink() : _buildRangeStart(context);
     }
@@ -401,6 +426,76 @@ class _DetailSheetState extends ConsumerState<DetailSheet> {
                 label: labels[m]!,
                 selected: _startOffsetMinutes == m,
                 onTap: () => setState(() => _startOffsetMinutes = m),
+              ),
+          ],
+        ),
+        if (widget.type == ActivityType.sleep) ..._sleepPeriodSection(context),
+      ],
+    );
+  }
+
+  /// 18시 이전·20시 이후는 자동 분류라 안내 문구만 보여주고, 18~20시 애매한
+  /// 구간에서만 낮잠/밤잠 칩을 노출한다. 시작 시각 칩을 바꾸면 즉시 다시 계산된다.
+  List<Widget> _sleepPeriodSection(BuildContext context) {
+    final colors = context.colors;
+    final effectiveStart = DateTime.now().subtract(
+      Duration(minutes: _startOffsetMinutes),
+    );
+    final ambiguous = isAmbiguousSleepWindow(effectiveStart);
+    if (!ambiguous) {
+      final auto = defaultSleepPeriod(effectiveStart);
+      return [
+        const SizedBox(height: 16),
+        Text(
+          '${auto.label}으로 자동 기록돼요',
+          style: AppTypography.label.copyWith(color: colors.muted),
+        ),
+      ];
+    }
+    final selected = _sleepPeriod ?? SleepPeriod.nap;
+    return [
+      const SizedBox(height: 20),
+      Text(
+        '낮잠 / 밤잠',
+        style: AppTypography.label.copyWith(color: colors.onSurfaceVariant),
+      ),
+      const SizedBox(height: 8),
+      Wrap(
+        spacing: 8,
+        children: [
+          for (final p in SleepPeriod.values)
+            _Chip(
+              label: p.label,
+              selected: selected == p,
+              onTap: () => setState(() => _sleepPeriod = p),
+            ),
+        ],
+      ),
+    ];
+  }
+
+  Widget _buildSleepPeriodEditor(BuildContext context) {
+    final colors = context.colors;
+    final selected =
+        _sleepPeriod ??
+        widget.editing!.sleepPeriod ??
+        defaultSleepPeriod(_editStartedAt ?? widget.editing!.startedAt);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '낮잠 / 밤잠',
+          style: AppTypography.label.copyWith(color: colors.onSurfaceVariant),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          children: [
+            for (final p in SleepPeriod.values)
+              _Chip(
+                label: p.label,
+                selected: selected == p,
+                onTap: () => setState(() => _sleepPeriod = p),
               ),
           ],
         ),

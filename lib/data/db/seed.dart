@@ -75,13 +75,13 @@ List<ActivitiesCompanion> _todaySeed(DateTime today) {
       type: ActivityType.sleep,
       startedAt: at(7, 25),
       endedAt: at(8, 0),
-      payload: const {'place': '아기침대'},
+      payload: const {'place': '아기침대', 'period': 'nap'},
     ),
     _row(
       type: ActivityType.sleep,
       startedAt: at(10, 9),
       endedAt: at(11, 8),
-      payload: const {'place': '아기침대'},
+      payload: const {'place': '아기침대', 'period': 'nap'},
     ),
     _row(
       type: ActivityType.formula,
@@ -112,7 +112,7 @@ List<ActivitiesCompanion> _daySeed(DateTime day, double recency, Random rnd) {
         type: ActivityType.sleep,
         startedAt: start,
         endedAt: end,
-        payload: const {'place': '아기침대'},
+        payload: const {'place': '아기침대', 'period': 'night'},
       ),
     );
     remaining -= segMin;
@@ -127,7 +127,7 @@ List<ActivitiesCompanion> _daySeed(DateTime day, double recency, Random rnd) {
       type: ActivityType.sleep,
       startedAt: morningNapStart,
       endedAt: morningNapStart.add(Duration(minutes: 30 + rnd.nextInt(40))),
-      payload: const {'place': '거실'},
+      payload: const {'place': '거실', 'period': 'nap'},
     ),
   );
 
@@ -137,7 +137,7 @@ List<ActivitiesCompanion> _daySeed(DateTime day, double recency, Random rnd) {
       type: ActivityType.sleep,
       startedAt: afternoonNapStart,
       endedAt: afternoonNapStart.add(Duration(minutes: 40 + rnd.nextInt(50))),
-      payload: const {'place': '거실'},
+      payload: const {'place': '거실', 'period': 'nap'},
     ),
   );
 

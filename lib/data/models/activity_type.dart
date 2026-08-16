@@ -38,3 +38,28 @@ enum DiaperSub {
   /// 대변이 섞인 계열인지(색·묽기 표시 분기용).
   bool get hasPoop => this == poop || this == both;
 }
+
+/// 수면 구간이 낮잠인지 밤잠인지. 입력은 시간대 기준 자동 분류가 기본이고,
+/// 애매한 구간(18~20시)에서만 길게 눌러 고를 수 있게 한다.
+enum SleepPeriod {
+  nap,
+  night;
+
+  String get label => switch (this) {
+    SleepPeriod.nap => '낮잠',
+    SleepPeriod.night => '밤잠',
+  };
+}
+
+/// 18시 이전은 낮잠, 20시 이후는 무조건 밤잠. 그 사이(18~20시)는 애매한
+/// 구간이라 기본값은 낮잠으로 두고(짧은 탭), 상세 시트(길게 누름)에서만
+/// 밤잠으로 바꿀 수 있게 한다.
+SleepPeriod defaultSleepPeriod(DateTime startedAt) {
+  return startedAt.hour >= 20 ? SleepPeriod.night : SleepPeriod.nap;
+}
+
+/// 18~20시: 짧은 탭은 낮잠으로 자동 기록되지만, 길게 눌러 밤잠으로 바꿀 수 있는 구간.
+bool isAmbiguousSleepWindow(DateTime startedAt) {
+  final h = startedAt.hour;
+  return h >= 18 && h < 20;
+}

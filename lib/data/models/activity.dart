@@ -49,11 +49,24 @@ class Activity {
     return null;
   }
 
+  SleepPeriod? get sleepPeriod {
+    final s = payload['period'] as String?;
+    for (final e in SleepPeriod.values) {
+      if (e.name == s) return e;
+    }
+    return null;
+  }
+
   /// 버튼·토스트에 쓰는 짧은 요약. 누르기 전에 무엇이 기록될지 보여주기 위함.
   String get summary => switch (type) {
     ActivityType.formula => ml != null ? '${ml}ml' : '',
     ActivityType.breast => isRunning ? '진행 중' : dur(elapsed()),
-    ActivityType.sleep => isRunning ? '진행 중' : dur(elapsed()),
+    ActivityType.sleep =>
+      isRunning
+          ? '진행 중'
+          : (sleepPeriod != null
+                ? '${sleepPeriod!.label} · ${dur(elapsed())}'
+                : dur(elapsed())),
     ActivityType.solid => food ?? '',
     ActivityType.diaper => diaperSub?.label ?? '',
   };
