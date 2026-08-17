@@ -11,6 +11,11 @@ import 'providers/activity_provider.dart';
 import 'providers/baby_profile_provider.dart';
 import 'providers/settings_provider.dart';
 
+/// 로딩 화면(아기 사진)이 눈에 띄게 보이도록 최소한 이만큼은 띄워둔다.
+/// 실제 DB/시드 초기화는 이 시간과 병렬로 진행되므로, 초기화가 더 오래 걸리는
+/// 기기에서도 총 대기 시간은 늘어나지 않는다(더 늦게 끝나는 쪽에 맞춰질 뿐).
+const _kSplashMinDuration = Duration(seconds: 3);
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const _Bootstrap());
@@ -40,8 +45,9 @@ class _BootstrapState extends State<_Bootstrap> {
     final prefs = await SharedPreferences.getInstance();
     if (mounted) setState(() => _prefs = prefs);
 
+    final minSplash = Future<void>.delayed(_kSplashMinDuration);
     final db = AppDatabase();
-    await seedIfEmpty(db);
+    await Future.wait([seedIfEmpty(db), minSplash]);
     if (!mounted) return;
     setState(() => _db = db);
   }
