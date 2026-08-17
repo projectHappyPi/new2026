@@ -93,6 +93,19 @@ class SettingsScreen extends ConsumerWidget {
             to: settings.nightTo,
             onChanged: notifier.setNightWindow,
           ),
+          _SwitchRow(
+            label: '로딩 화면에 사진 표시',
+            value: settings.showSplashPhoto,
+            onChanged: notifier.setShowSplashPhoto,
+          ),
+          if (!settings.showSplashPhoto)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                '꺼두면 대기 시간 없이 곧바로 시작돼요',
+                style: AppTypography.label.copyWith(color: colors.muted),
+              ),
+            ),
           const _SectionHeader('기본값'),
           _StepperRow(
             label: '분유 기본 용량',

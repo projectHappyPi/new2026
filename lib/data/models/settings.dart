@@ -46,6 +46,9 @@ class Settings {
   final FormulaMode formulaMode;
   final DiaperDefaultSub diaperDefaultSub;
 
+  /// 시작 로딩 화면에 아기 사진을 보여줄지. 끄면 최소 노출 시간 없이 곧바로 시작된다.
+  final bool showSplashPhoto;
+
   const Settings({
     this.oneHandMode = true,
     this.handSide = HandSide.right,
@@ -58,6 +61,7 @@ class Settings {
     this.formulaDefaultMl = 150,
     this.formulaMode = FormulaMode.fixed,
     this.diaperDefaultSub = DiaperDefaultSub.pee,
+    this.showSplashPhoto = true,
   });
 
   bool get isRightHand => handSide == HandSide.right;
@@ -74,6 +78,7 @@ class Settings {
     int? formulaDefaultMl,
     FormulaMode? formulaMode,
     DiaperDefaultSub? diaperDefaultSub,
+    bool? showSplashPhoto,
   }) {
     return Settings(
       oneHandMode: oneHandMode ?? this.oneHandMode,
@@ -87,6 +92,7 @@ class Settings {
       formulaDefaultMl: formulaDefaultMl ?? this.formulaDefaultMl,
       formulaMode: formulaMode ?? this.formulaMode,
       diaperDefaultSub: diaperDefaultSub ?? this.diaperDefaultSub,
+      showSplashPhoto: showSplashPhoto ?? this.showSplashPhoto,
     );
   }
 }

@@ -20,6 +20,9 @@ const _kFormulaDefaultMl = 'formulaDefaultMl';
 const _kFormulaMode = 'formulaMode';
 const _kDiaperDefaultSub = 'diaperDefaultSub';
 
+/// main.dart의 부트스트랩이 Riverpod 없이 곧바로 읽어야 해서 공개 키로 둔다.
+const kShowSplashPhotoKey = 'showSplashPhoto';
+
 class SettingsNotifier extends Notifier<Settings> {
   @override
   Settings build() {
@@ -39,6 +42,7 @@ class SettingsNotifier extends Notifier<Settings> {
           .values[p.getInt(_kFormulaMode) ?? FormulaMode.fixed.index],
       diaperDefaultSub: DiaperDefaultSub
           .values[p.getInt(_kDiaperDefaultSub) ?? DiaperDefaultSub.pee.index],
+      showSplashPhoto: p.getBool(kShowSplashPhotoKey) ?? true,
     );
   }
 
@@ -89,6 +93,11 @@ class SettingsNotifier extends Notifier<Settings> {
   void setDiaperDefaultSub(DiaperDefaultSub v) {
     state = state.copyWith(diaperDefaultSub: v);
     _prefs.setInt(_kDiaperDefaultSub, v.index);
+  }
+
+  void setShowSplashPhoto(bool v) {
+    state = state.copyWith(showSplashPhoto: v);
+    _prefs.setBool(kShowSplashPhotoKey, v);
   }
 }
 

@@ -45,9 +45,15 @@ class _BootstrapState extends State<_Bootstrap> {
     final prefs = await SharedPreferences.getInstance();
     if (mounted) setState(() => _prefs = prefs);
 
-    final minSplash = Future<void>.delayed(_kSplashMinDuration);
     final db = AppDatabase();
-    await Future.wait([seedIfEmpty(db), minSplash]);
+    // 설정 > 화면 > 로딩 화면에 사진 표시가 꺼져 있으면 최소 노출 시간 없이
+    // 실제 초기화가 끝나는 대로 곧바로 넘어간다.
+    if (prefs.getBool(kShowSplashPhotoKey) ?? true) {
+      final minSplash = Future<void>.delayed(_kSplashMinDuration);
+      await Future.wait([seedIfEmpty(db), minSplash]);
+    } else {
+      await seedIfEmpty(db);
+    }
     if (!mounted) return;
     setState(() => _db = db);
   }
@@ -56,10 +62,13 @@ class _BootstrapState extends State<_Bootstrap> {
   Widget build(BuildContext context) {
     final prefs = _prefs;
     if (prefs == null || _db == null) {
+      final showPhoto = prefs?.getBool(kShowSplashPhotoKey) ?? true;
       return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-          body: LoadingScreen(photoPath: prefs?.getString(kBabyPhotoPathKey)),
+          body: LoadingScreen(
+            photoPath: showPhoto ? prefs?.getString(kBabyPhotoPathKey) : null,
+          ),
         ),
       );
     }
