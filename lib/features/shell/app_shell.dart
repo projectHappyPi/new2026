@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
+import '../../providers/activity_provider.dart';
 import '../../providers/running_provider.dart';
 import '../pattern/pattern_screen.dart';
 import '../record/record_screen.dart';
@@ -16,7 +17,8 @@ class AppShell extends ConsumerStatefulWidget {
   ConsumerState<AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends ConsumerState<AppShell> {
+class _AppShellState extends ConsumerState<AppShell>
+    with WidgetsBindingObserver {
   int _index = 0;
 
   static const _tabs = [
@@ -25,6 +27,28 @@ class _AppShellState extends ConsumerState<AppShell> {
     (icon: Icons.donut_large_rounded, label: '패턴'),
     (icon: Icons.settings_rounded, label: '설정'),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // 시리 App Intent나 홈 화면 위젯이 앱이 백그라운드에 있는 동안 같은 DB
+    // 파일에 직접 기록을 남겼을 수 있다. drift는 자기 자신을 거치지 않은
+    // 쓰기를 모르므로, 포그라운드로 돌아올 때마다 강제로 다시 읽게 한다.
+    if (state == AppLifecycleState.resumed) {
+      ref.read(databaseProvider).notifyExternalWrite();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
