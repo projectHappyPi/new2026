@@ -224,6 +224,88 @@
   td .sw { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; vertical-align: 1px; }
   td.mono { font-family: var(--mono); font-size: 12.5px; }
 
+
+  /* ───────── 달력 · 위젯 ───────── */
+  .jump { display: flex; gap: 8px; flex-wrap: wrap; }
+  .jump a { font-size: 13px; color: var(--accent); text-decoration: none; border: 1px solid var(--line); padding: 5px 12px; border-radius: 999px; background: var(--surface); }
+  .jump a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .part-head { display: grid; gap: 6px; max-width: 72ch; padding-top: 12px; border-top: 1px solid var(--line); }
+  .cw-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .cw-controls button, .cw-controls label {
+    font: inherit; font-size: 13.5px; border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+    padding: 7px 12px; border-radius: 10px; cursor: pointer; display: inline-flex; gap: 6px; align-items: center;
+  }
+  .cw-controls button:hover { border-color: var(--accent); }
+  .cw-controls button:focus-visible, .cw-controls input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .stage2 { display: grid; grid-template-columns: repeat(3, auto); gap: 28px; justify-content: start; }
+  @media (max-width: 1040px) { .stage2 { grid-template-columns: repeat(2, auto); } }
+  @media (max-width: 700px) { .stage2 { grid-template-columns: 1fr; justify-items: center; } }
+
+  .lockphoto { position: absolute; inset: 0; background:
+      radial-gradient(90% 60% at 30% 75%, #6b5a4e 0%, transparent 60%),
+      radial-gradient(80% 50% at 80% 40%, #4a4550 0%, transparent 65%),
+      linear-gradient(170deg, #3a3531 0%, #231f1c 55%, #151210 100%); }
+  .lock2 { position: absolute; inset: 0; z-index: 2; display: grid; align-content: start; justify-items: center; padding-top: 56px; color: #fff; }
+  .lock2 .date { font-size: 12px; opacity: .85; }
+  .lock2 .clock { font-size: 60px; font-weight: 600; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  /* 두 번째 캡처와 같은 잠금화면 상태 위젯 */
+  .lw { margin-top: 18px; width: calc(100% - 36px); display: grid; gap: 1px; text-shadow: 0 1px 6px rgba(0,0,0,.35); }
+  .lw .h { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; }
+  .lw .h span:last-child { opacity: .6; }
+  .lw .r { display: flex; gap: 7px; align-items: baseline; }
+  .lw .r b { font-size: 14px; }
+  .lw .r .t { font-size: 19px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .lw .n { font-size: 12px; opacity: .75; padding-left: 8px; font-variant-numeric: tabular-nums; }
+
+  .homebg { position: absolute; inset: 0; background: linear-gradient(180deg, #2e2a33 0%, #1b1a20 100%); }
+  .cwid { position: absolute; left: 12px; right: 12px; top: 46px; z-index: 2; border-radius: 22px; padding: 11px 10px 9px;
+    background: #26221F; color: #fff; display: grid; gap: 6px; font-size: 10px; }
+  .cwid.light { background: #F4F1EC; color: #1B1B1F; }
+  .cw-top { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .cw-top .ttl { font-size: 11.5px; font-weight: 700; margin-bottom: 3px; }
+  .cw-line { display: flex; gap: 4px; align-items: center; white-space: nowrap; overflow: hidden; font-size: 9.5px; }
+  .cw-line i { width: 3px; height: 10px; border-radius: 1px; flex: none; }
+  .cw-dim { opacity: .6; }
+  .cw-st .h { display: flex; justify-content: space-between; font-weight: 700; font-size: 10.5px; }
+  .cw-st .r { display: flex; gap: 4px; align-items: baseline; white-space: nowrap; }
+  .cw-st .r b { font-size: 10.5px; }
+  .cw-st .r .t { font-size: 12.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .cw-st .n { font-size: 9px; opacity: .65; padding-left: 5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .cw-wd, .cw-grid-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; }
+  .cw-wd span { text-align: center; font-size: 8.5px; opacity: .7; }
+  .cw-grid { display: grid; gap: 1px; }
+  .cw-cell { min-height: 33px; display: grid; align-content: start; gap: 1px; min-width: 0; }
+  .cw-cell .d { justify-self: center; font-size: 8.5px; font-weight: 700; padding: 0 3px; border-radius: 6px; font-variant-numeric: tabular-nums; }
+  .cw-cell .d.today { background: rgba(224,104,90,.35); }
+  .cw-cell.out { opacity: .35; }
+  .cw-bar { font-size: 6.8px; line-height: 1.35; color: #fff; border-radius: 2px; padding: 0 2px; white-space: nowrap; overflow: hidden; }
+  .cw-more { font-size: 6.5px; opacity: .6; text-align: center; }
+  .sun { color: #E0685A; } .sat { color: #5B8FD9; }
+  .icons { position: absolute; left: 20px; right: 20px; bottom: 46px; z-index: 2; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .icons i { aspect-ratio: 1; border-radius: 12px; background: rgba(255,255,255,.1); }
+
+  /* 갤럭시: 앱 달력 탭 */
+  .ga { position: absolute; inset: 28px 0 0 0; background: #15110F; color: #F1E9E0; display: flex; flex-direction: column; }
+  .ga-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px 4px; }
+  .ga-head b { font-size: 15px; }
+  .ga-head span { font-size: 11px; color: #B8ABA1; }
+  .ga .cw-wd span { font-size: 9px; }
+  .ga .cw-grid { padding: 0 4px; }
+  .ga .cw-cell { min-height: 40px; border-top: 1px solid #2A2421; padding-top: 2px; }
+  .ga .cw-cell.sel { background: rgba(241,233,224,.07); }
+  .ga .cw-cell .d { font-size: 9px; }
+  .ga .cw-bar { font-size: 7px; }
+  .ga-day { padding: 8px 14px 2px; font-size: 11.5px; font-weight: 600; border-top: 1px solid #2A2421; }
+  .ga-list { flex: 1; overflow: hidden; }
+  .ga-item { display: grid; grid-template-columns: 48px 3px 1fr auto; gap: 8px; align-items: center; padding: 6px 14px; font-size: 11px; }
+  .ga-item .tm { font-family: var(--mono); font-size: 10px; color: #B8ABA1; }
+  .ga-item i { height: 22px; border-radius: 2px; }
+  .ga-item .who { font-size: 9.5px; color: #B8ABA1; background: #292220; padding: 1px 7px; border-radius: 8px; }
+  .ga-empty { padding: 10px 14px; font-size: 11px; color: #7F736A; }
+  .ga-fab { position: absolute; right: 14px; bottom: 58px; width: 38px; height: 38px; border-radius: 12px; background: #F1E9E0; color: #15110F; display: grid; place-items: center; font-size: 22px; line-height: 1; }
+  .ga .tabs { grid-template-columns: repeat(5, 1fr); background: #1E1917; border-top-color: #2A2421; color: #7F736A; }
+  .ga .tabs span.on { color: #F1E9E0; }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
   }
@@ -236,7 +318,12 @@
     <p class="lede">아이폰은 시리가 앱을 열지 않고 바로 저장하고, 갤럭시는 앱의 마이크 버튼(엄지 궤적 6번째 자리)으로 말하면 바로 저장돼요. 아래 문장을 누르면 두 기기가 동시에 움직이고, 저장된 기록은 오른쪽 타임라인에 쌓입니다. 인식 규칙은 앱과 같은 코드입니다.</p>
   </header>
 
-  <section class="commands" aria-labelledby="cmd-title">
+  <nav class="jump" aria-label="목업 바로가기">
+    <a href="#voice">말로 기록</a>
+    <a href="#calendar">달력 · 위젯</a>
+  </nav>
+
+  <section class="commands" id="voice" aria-labelledby="cmd-title">
     <div class="commands-head">
       <h2 id="cmd-title">말해 보기</h2>
       <span class="hint">잠들었어 → 깼어 순서로 누르면 수면 구간이 닫혀요</span>
@@ -358,6 +445,84 @@
         <li>빅스비·구글 어시스턴트로 앱 밖에서 바로 저장하는 건 이번 범위에서 뺐어요.</li>
       </ul>
     </div>
+  </section>
+
+  <section class="part-head" id="calendar" aria-labelledby="cal-title">
+    <span class="eyebrow">튼튼이 · 달력 · 위젯 목업</span>
+    <h1 id="cal-title" style="font-size:clamp(22px,3.4vw,28px)">엄마·아빠가 같이 보는 달력과 위젯</h1>
+    <p class="lede">아빠 폰(갤럭시)에서 일정을 넣으면 동기화 서버를 거쳐 엄마 아이폰의 달력 위젯에도 떠요. 잠금화면 위젯은 두 번째 캡처와 같은 모양으로 초 단위로 움직이고, 달력 위젯의 비어 있던 오른쪽 위 자리에 같은 내용이 들어가요.</p>
+  </section>
+
+  <div class="cw-controls" role="group" aria-label="데모 조작">
+    <button type="button" id="cw-add">＋ 아빠 폰에서 “예방접종” 추가</button>
+    <button type="button" id="cw-feed">🍼 방금 모유 먹었어</button>
+    <button type="button" id="cw-wake">☀️ 깼어</button>
+    <label for="cw-status"><input type="checkbox" id="cw-status" checked> 달력 위젯 오른쪽 위에 상태 표시</label>
+    <label for="cw-light"><input type="checkbox" id="cw-light"> 위젯 밝게</label>
+  </div>
+
+  <section class="stage2" aria-label="달력·위젯 기기 시뮬레이션">
+    <div class="device">
+      <div class="phone">
+        <div class="screen">
+          <div class="notch"></div>
+          <div class="lockphoto"></div>
+          <div class="statusbar" style="position:relative;z-index:3;color:#fff"><span class="now-hm">03:12</span><span>5G ▮▮▮</span></div>
+          <div class="lock2">
+            <div class="date cw-date">9월 28일 월요일</div>
+            <div class="clock now-hm">03:12</div>
+            <div class="lw" id="lw"></div>
+          </div>
+        </div>
+      </div>
+      <div class="device-label"><strong>엄마 iPhone · 잠금화면</strong><span>두 번째 캡처와 같은 상태 위젯</span></div>
+    </div>
+
+    <div class="device">
+      <div class="phone">
+        <div class="screen">
+          <div class="notch"></div>
+          <div class="homebg"></div>
+          <div class="statusbar" style="position:relative;z-index:3;color:#fff"><span class="now-hm">03:12</span><span>5G ▮▮▮</span></div>
+          <div class="cwid" id="cwid"></div>
+          <div class="icons"><i></i><i></i><i></i><i></i></div>
+        </div>
+      </div>
+      <div class="device-label"><strong>엄마 iPhone · 홈 화면</strong><span>달력 위젯(크게) · 오른쪽 위에 튼튼이 상태</span></div>
+    </div>
+
+    <div class="device">
+      <div class="phone galaxy">
+        <div class="screen">
+          <div class="punch"></div>
+          <div class="statusbar"><span class="now-hm">03:12</span><span>LTE ▮▮▮</span></div>
+          <div class="ga">
+            <div class="ga-head"><b id="ga-month">2026년 9월</b><span>오늘 ‹ ›</span></div>
+            <div class="cw-wd"><span class="sun">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span class="sat">토</span></div>
+            <div class="cw-grid" id="ga-grid"></div>
+            <div class="ga-day" id="ga-day"></div>
+            <div class="ga-list" id="ga-list"></div>
+            <div class="ga-fab" aria-hidden="true">+</div>
+            <div class="tabs"><span>기록</span><span>타임라인</span><span class="on">달력</span><span>패턴</span><span>설정</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="device-label"><strong>아빠 Galaxy · 앱 달력 탭</strong><span>날 누르면 그날 일정, ＋로 추가</span></div>
+    </div>
+  </section>
+
+  <section class="table-wrap" aria-label="위젯 설정 항목">
+    <table>
+      <thead><tr><th>위젯 설정 (앱 설정 › 위젯)</th><th>기본값</th><th>설명</th></tr></thead>
+      <tbody>
+        <tr><td>아기 이름 · D+일수</td><td>켬</td><td>맨 윗줄 “튼튼이 · D+248”</td></tr>
+        <tr><td>마지막 수유</td><td>켬 · 모유/분유로</td><td>“모유 48분 14초 전”. “수유”로 묶어 쓸 수도 있어요</td></tr>
+        <tr><td>다음 수유까지</td><td>최근 간격 평균</td><td>“→ 3시간 35분 남음”. 고정 간격(예: 3시간)도 선택</td></tr>
+        <tr><td>수면</td><td>켬</td><td>자는 중이면 “밤잠 47분 48초 전”, 깼으면 “기상 … 전”</td></tr>
+        <tr><td>달력 위젯 오른쪽 위</td><td>튼튼이 상태</td><td>끄면 다가오는 일정 목록</td></tr>
+        <tr><td>배경</td><td>어둡게</td><td>밝게 · 시스템 따라가기</td></tr>
+      </tbody>
+    </table>
   </section>
 </div>
 
@@ -610,5 +775,149 @@
   tick();
   setInterval(tick, 15000);
   addEventListener('resize', () => { clearTimeout(window.__rz); window.__rz = setTimeout(buildArc, 150); });
+})();
+</script>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const pad = (n) => String(n).padStart(2, '0');
+  const COLORS = { red: '#E0685A', orange: '#E59A4E', yellow: '#D9B44A', green: '#6FAF72', teal: '#4FA8A0', blue: '#5B8FD9', purple: '#9A7BD1', pink: '#D97FA7' };
+  const now0 = new Date();
+  const dayAt = (off, h = 0, m = 0) => { const d = new Date(now0); d.setDate(d.getDate() + off); d.setHours(h, m, 0, 0); return d; };
+  const events = [
+    { title: '소아과', start: dayAt(0, 10, 0), color: 'red', who: '엄마' },
+    { title: '분유 주문', start: dayAt(0, 14, 0), color: 'yellow', who: '아빠' },
+    { title: '영유아 검진', start: dayAt(-5, 11, 0), color: 'green', who: '엄마' },
+    { title: '문화센터', start: dayAt(4, 11, 0), color: 'purple', who: '엄마' },
+    { title: '이유식 장보기', start: dayAt(7, 18, 0), color: 'orange', who: '아빠' },
+    { title: '할머니 댁', start: dayAt(10, 0, 0), allDay: true, color: 'teal', who: '아빠' },
+  ];
+  const st = {
+    feedLabel: '모유',
+    lastFeed: new Date(Date.now() - (48 * 60 + 14) * 1000),
+    interval: (48 * 60 + 3 * 3600 + 35 * 60) * 1000,
+    sleepLabel: '밤잠',
+    sleepAt: new Date(Date.now() - (47 * 60 + 48) * 1000),
+  };
+  let selected = dayAt(0);
+  let added = false;
+
+  const rel = (ms) => {
+    const s = Math.max(0, Math.floor(Math.abs(ms) / 1000));
+    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    return h > 0 ? `${h}시간 ${m}분` : m > 0 ? `${m}분 ${sec}초` : `${sec}초`;
+  };
+  const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  const hm = (d) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const esc = (t) => t.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  function statusHTML(small) {
+    const now = Date.now();
+    const next = st.lastFeed.getTime() + st.interval;
+    const nextTxt = next > now ? `→ ${rel(next - now)} 남음` : `→ ${rel(now - next)} 지남`;
+    const cls = small ? 'cw-st' : '';
+    return `<div class="${cls}">
+      <div class="h"><span>튼튼이</span><span>D+248</span></div>
+      <div class="r"><b>${st.feedLabel}</b><span class="t">${rel(now - st.lastFeed)} 전</span></div>
+      <div class="n">${nextTxt}</div>
+      <div class="r"><b>${st.sleepLabel}</b><span class="t">${rel(now - st.sleepAt)} 전</span></div>
+    </div>`;
+  }
+
+  function gridStart(d) { const f = new Date(d.getFullYear(), d.getMonth(), 1); f.setDate(1 - f.getDay()); return f; }
+
+  function gridHTML(ref, { maxBars, selectable }) {
+    const start = gridStart(ref);
+    const today = new Date();
+    let out = '';
+    for (let w = 0; w < 6; w++) {
+      out += '<div class="cw-grid-row">';
+      for (let d = 0; d < 7; d++) {
+        const day = new Date(start); day.setDate(start.getDate() + w * 7 + d);
+        const evs = events.filter((e) => sameDay(e.start, day));
+        const cls = ['cw-cell', day.getMonth() !== ref.getMonth() ? 'out' : '', selectable && sameDay(day, selected) ? 'sel' : ''].join(' ');
+        const dc = ['d', d === 0 ? 'sun' : d === 6 ? 'sat' : '', sameDay(day, today) ? 'today' : ''].join(' ');
+        out += `<div class="${cls}" ${selectable ? `data-day="${day.toISOString()}" role="button" tabindex="0"` : ''}><span class="${dc}">${day.getDate()}</span>`;
+        for (const e of evs.slice(0, maxBars)) out += `<span class="cw-bar" style="background:${COLORS[e.color]}">${esc(e.title)}</span>`;
+        if (evs.length > maxBars) out += `<span class="cw-more">+${evs.length - maxBars}</span>`;
+        out += '</div>';
+      }
+      out += '</div>';
+    }
+    return out;
+  }
+
+  function renderLock() { $('lw').innerHTML = statusHTML(false).replace('<div class="">', '<div>'); }
+
+  function renderWidget() {
+    const w = $('cwid');
+    w.classList.toggle('light', $('cw-light').checked);
+    const today = new Date();
+    const todays = events.filter((e) => sameDay(e.start, today)).sort((a, b) => a.start - b.start);
+    const left = `<div><div class="ttl">${today.getMonth() + 1}월 ${today.getDate()}일 ${'일월화수목금토'[today.getDay()]}요일</div>
+      ${todays.length ? todays.slice(0, 4).map((e) => `<div class="cw-line"><i style="background:${COLORS[e.color]}"></i>${e.allDay ? '종일' : hm(e.start)} ${esc(e.title)}</div>`).join('') : '<div class="cw-dim">오늘 일정 없음</div>'}</div>`;
+    let right;
+    if ($('cw-status').checked) right = statusHTML(true);
+    else {
+      const t1 = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+      const up = events.filter((e) => e.start >= t1).sort((a, b) => a.start - b.start).slice(0, 4);
+      right = `<div><div class="ttl">다가오는 일정</div>${up.map((e) => `<div class="cw-line"><i style="background:${COLORS[e.color]}"></i>${e.start.getMonth() + 1}/${e.start.getDate()} ${esc(e.title)}</div>`).join('')}</div>`;
+    }
+    w.innerHTML = `<div class="cw-top">${left}${right}</div>
+      <div class="cw-wd"><span class="sun">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span class="sat">토</span></div>
+      <div class="cw-grid">${gridHTML(today, { maxBars: 2, selectable: false })}</div>`;
+  }
+
+  function renderGalaxy() {
+    const ref = selected;
+    $('ga-month').textContent = `${ref.getFullYear()}년 ${ref.getMonth() + 1}월`;
+    $('ga-grid').innerHTML = gridHTML(ref, { maxBars: 2, selectable: true });
+    $('ga-day').textContent = `${selected.getMonth() + 1}월 ${selected.getDate()}일 ${'일월화수목금토'[selected.getDay()]}요일`;
+    const list = events.filter((e) => sameDay(e.start, selected)).sort((a, b) => a.start - b.start);
+    $('ga-list').innerHTML = list.length
+      ? list.map((e) => `<div class="ga-item"><span class="tm">${e.allDay ? '종일' : hm(e.start)}</span><i style="background:${COLORS[e.color]}"></i><span>${esc(e.title)}</span><span class="who">${e.who}</span></div>`).join('')
+      : '<div class="ga-empty">일정이 없어요 · + 로 추가</div>';
+  }
+
+  function tick() {
+    const d = new Date();
+    document.querySelectorAll('.cw-date').forEach((el) => (el.textContent = `${d.getMonth() + 1}월 ${d.getDate()}일 ${'일월화수목금토'[d.getDay()]}요일`));
+    renderLock();
+    renderWidget();
+  }
+
+  $('ga-grid').addEventListener('click', (e) => {
+    const c = e.target.closest('[data-day]');
+    if (!c) return;
+    selected = new Date(c.dataset.day);
+    renderGalaxy();
+  });
+  $('ga-grid').addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const c = e.target.closest('[data-day]');
+    if (!c) return;
+    e.preventDefault();
+    selected = new Date(c.dataset.day);
+    renderGalaxy();
+  });
+  $('cw-add').addEventListener('click', () => {
+    if (added) return;
+    added = true;
+    const ev = { title: '예방접종 (DTaP 3차)', start: dayAt(2, 10, 30), color: 'red', who: '아빠' };
+    events.push(ev);
+    selected = dayAt(2);
+    renderGalaxy();
+    $('cw-add').textContent = '✓ 추가됨 · 엄마 위젯에도 반영';
+    setTimeout(tick, 600); // 동기화(서버) 지연을 흉내
+  });
+  $('cw-feed').addEventListener('click', () => { st.lastFeed = new Date(); st.feedLabel = '모유'; tick(); });
+  $('cw-wake').addEventListener('click', () => { st.sleepLabel = '기상'; st.sleepAt = new Date(); tick(); });
+  $('cw-status').addEventListener('change', renderWidget);
+  $('cw-light').addEventListener('change', renderWidget);
+
+  renderGalaxy();
+  tick();
+  setInterval(tick, 1000);
 })();
 </script>

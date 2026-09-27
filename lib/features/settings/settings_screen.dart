@@ -16,6 +16,8 @@ import '../../data/models/settings.dart';
 import '../../providers/activity_provider.dart';
 import '../../providers/baby_profile_provider.dart';
 import '../../providers/settings_provider.dart';
+import '../widgets/widget_settings_screen.dart';
+import 'family_settings_screen.dart';
 
 /// 9절 설정 화면. 여기서 바꾼 값은 홈 궤적·시트 정렬·스와이프 방향·테마에
 /// 곧바로 반영된다(모두 settingsProvider 하나를 구독하므로 별도 새로고침이 없다).
@@ -43,6 +45,25 @@ class SettingsScreen extends ConsumerWidget {
         children: [
           const _SectionHeader('아기 정보'),
           const _BabyInfoRow(),
+          const _SectionHeader('공유 · 위젯'),
+          _ActionRow(
+            label: '가족 공유 (기록·달력 동기화)',
+            icon: Icons.family_restroom_rounded,
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const FamilySettingsScreen(),
+              ),
+            ),
+          ),
+          _ActionRow(
+            label: '위젯',
+            icon: Icons.widgets_rounded,
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const WidgetSettingsScreen(),
+              ),
+            ),
+          ),
           const _SectionHeader('입력'),
           _SwitchRow(
             label: '한손 입력 모드',

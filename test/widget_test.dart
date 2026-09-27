@@ -2,6 +2,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:parenting_log/app.dart';
 import 'package:parenting_log/data/db/database.dart';
 import 'package:parenting_log/providers/activity_provider.dart';
@@ -28,7 +29,10 @@ Future<void> _settle(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('아기 프로필이 있으면 4개 탭과 함께 기록 화면으로 시작한다', (tester) async {
+  // 달력 탭(IndexedStack으로 함께 빌드됨)이 한국어 날짜 형식을 쓴다.
+  setUpAll(() => initializeDateFormatting('ko_KR'));
+
+  testWidgets('아기 프로필이 있으면 5개 탭과 함께 기록 화면으로 시작한다', (tester) async {
     SharedPreferences.setMockInitialValues({
       kBabyNameKey: '튼튼이',
       kBabyBirthDateKey: DateTime(2026, 1, 1).millisecondsSinceEpoch,
@@ -42,6 +46,7 @@ void main() {
 
     expect(find.text('기록'), findsWidgets);
     expect(find.text('타임라인'), findsOneWidget);
+    expect(find.text('달력'), findsOneWidget);
     expect(find.text('패턴'), findsWidgets);
     expect(find.text('설정'), findsOneWidget);
 

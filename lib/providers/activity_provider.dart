@@ -6,6 +6,7 @@ import '../data/models/activity.dart';
 import '../data/models/activity_type.dart';
 import '../data/models/settings.dart';
 import '../data/repositories/activity_repository.dart';
+import '../data/sync/family_config.dart';
 import 'settings_provider.dart';
 
 /// main()에서 초기화한 인스턴스로 override 된다.
@@ -14,7 +15,10 @@ final databaseProvider = Provider<AppDatabase>((ref) {
 });
 
 final activityRepositoryProvider = Provider<ActivityRepository>((ref) {
-  return DriftActivityRepository(ref.watch(databaseProvider));
+  return DriftActivityRepository(
+    ref.watch(databaseProvider),
+    memberName: () => ref.read(familyConfigProvider).authorName,
+  );
 });
 
 /// 오늘 기록. 홈 화면의 오늘 합계 3분할 지표에 쓰인다.

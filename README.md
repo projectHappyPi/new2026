@@ -1,6 +1,28 @@
 # 튼튼이 (parenting_log)
 
-새벽 3시, 아기를 안은 채 한 손으로 3초 안에 기록하는 육아 기록 앱. Flutter · Riverpod · Drift(SQLite), 서버 없음.
+새벽 3시, 아기를 안은 채 한 손으로 3초 안에 기록하는 육아 기록 앱. Flutter · Riverpod · Drift(SQLite).
+엄마·아빠 폰은 작은 동기화 서버(`server/`)로 기록과 달력 일정을 공유한다.
+
+## 가족 공유 (동기화)
+
+- 서버: `server/` — Docker + Cloudflare Tunnel, 설치는 [server/README.md](server/README.md).
+- 앱 **설정 › 가족 공유**에 서버 주소 · 가족 코드 · 내 이름(엄마/아빠)을 두 폰 모두 입력.
+- 30초마다 + 기록 직후 동기화. 같은 기록은 마지막 수정이 이김, 삭제도 전파. 예시(시드) 기록은 올리지 않음.
+
+## 달력
+
+- 5번째 탭 **달력**: 월 그리드에 일정 막대, 날짜를 누르면 그날 목록, ＋로 추가(제목·종일·시간·색·메모).
+- 일정에는 작성자(엄마/아빠)가 붙고 상대 폰에도 뜬다.
+
+## 위젯
+
+| | iPhone | Galaxy |
+|---|---|---|
+| 튼튼이 상태 | 작게·중간·잠금화면. "모유 48분 14초 전 / → 3시간 35분 남음 / 밤잠 47분 48초 전" 초 단위 | 2×2. 같은 구성, 시간은 "48:14 전" 형식(안드로이드 위젯 제약) + 🎤 말로 기록 |
+| 튼튼이 달력 | 크게. 왼쪽 위 오늘 일정, 오른쪽 위 상태, 아래 한 달 | 4×4. 같은 구성 |
+
+표시 항목·다음 수유 계산(최근 간격 평균/고정)·배경은 **설정 › 위젯**에서.
+iOS 위젯 타깃: `ios/TunteuniWidget/` (번들 ID `com.happypi.parentingLog.TunteuniWidget`).
 
 ## 말로 기록
 
@@ -27,6 +49,7 @@
 flutter pub get
 flutter test
 node docs/mockup/voice-parser.test.js   # JS 파서도 같은 케이스로 확인
+(cd server && npm test)                 # 동기화 서버
 flutter run                              # 갤럭시 USB 디버깅
 ```
 
@@ -37,4 +60,4 @@ flutter run                              # 갤럭시 USB 디버깅
 1. Apple Developer 포털에서 App ID `com.happypi.parentingLog`에 **App Groups** capability 추가, 그룹 `group.com.happypi.parentingLog` 생성·연결 후 프로비저닝 프로필 재발급.
 2. Siri capability는 필요 없음(App Shortcuts). 배포 타깃 iOS 17.0.
 3. 시리 숫자 범위는 `scripts/gen_ios_voice_enums.py`에서 바꾸고 다시 실행.
-4. 홈 화면 위젯(`ios/widget_extension_source/`)은 아직 Xcode 타깃 미연결.
+4. 위젯용 번들 ID `com.happypi.parentingLog.TunteuniWidget`도 등록하고 같은 App Group을 켠 뒤 프로비저닝 프로필을 만들어 Codemagic에 추가(앱·위젯 프로필 2개).

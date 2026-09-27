@@ -19,6 +19,10 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		9A2325AB8A87A77504CE735F /* WidgetStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A68EF33F74285F65C0D2AA21 /* WidgetStore.swift */; };
+		4A1092394810963EC2866CBB /* WidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F0816C90D4AF21E06F5A6E7 /* WidgetViews.swift */; };
+		DA127B859404BA244A99E8AD /* TunteuniWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 712B3A8313090D060A445EFC /* TunteuniWidgets.swift */; };
+		7BD4DC3A944A5E986725FCD9 /* TunteuniWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A075F792833F8980FC35F32D /* TunteuniWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -28,6 +32,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 97C146ED1CF9000F007C117D;
 			remoteInfo = Runner;
+		};
+		749FCE4395057E7EEA04991E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8ECD3AA447599E43A09BED6C;
+			remoteInfo = TunteuniWidget;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -40,6 +51,17 @@
 			files = (
 			);
 			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B3986EA36E584C17CEF4697E /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				7BD4DC3A944A5E986725FCD9 /* TunteuniWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -65,6 +87,13 @@
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A075F792833F8980FC35F32D /* TunteuniWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TunteuniWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		A68EF33F74285F65C0D2AA21 /* WidgetStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetStore.swift; sourceTree = "<group>"; };
+		2F0816C90D4AF21E06F5A6E7 /* WidgetViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetViews.swift; sourceTree = "<group>"; };
+		712B3A8313090D060A445EFC /* TunteuniWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunteuniWidgets.swift; sourceTree = "<group>"; };
+		4133F12000AFCD2C9741F49C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1B4ED9463B89CAC1A518C375 /* TunteuniWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TunteuniWidget.entitlements; sourceTree = "<group>"; };
+		001328C731C1F96E9E06B965 /* Widget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Widget.xcconfig; path = Flutter/Widget.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +102,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2A70E730381355031C10B033 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -95,6 +131,7 @@
 				9740EEB21CF90195004384FC /* Debug.xcconfig */,
 				7AFA3C8E1D35360C0083082E /* Release.xcconfig */,
 				9740EEB31CF90195004384FC /* Generated.xcconfig */,
+				001328C731C1F96E9E06B965 /* Widget.xcconfig */,
 			);
 			name = Flutter;
 			sourceTree = "<group>";
@@ -106,6 +143,7 @@
 				97C146F01CF9000F007C117D /* Runner */,
 				97C146EF1CF9000F007C117D /* Products */,
 				331C8082294A63A400263BE5 /* RunnerTests */,
+				E814686423DDC89A433B9FFC /* TunteuniWidget */,
 			);
 			sourceTree = "<group>";
 		};
@@ -114,6 +152,7 @@
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				331C8081294A63A400263BE5 /* RunnerTests.xctest */,
+				A075F792833F8980FC35F32D /* TunteuniWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -135,6 +174,18 @@
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 			);
 			path = Runner;
+			sourceTree = "<group>";
+		};
+		E814686423DDC89A433B9FFC /* TunteuniWidget */ = {
+			isa = PBXGroup;
+			children = (
+				712B3A8313090D060A445EFC /* TunteuniWidgets.swift */,
+				2F0816C90D4AF21E06F5A6E7 /* WidgetViews.swift */,
+				A68EF33F74285F65C0D2AA21 /* WidgetStore.swift */,
+				4133F12000AFCD2C9741F49C /* Info.plist */,
+				1B4ED9463B89CAC1A518C375 /* TunteuniWidget.entitlements */,
+			);
+			path = TunteuniWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -166,11 +217,13 @@
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
+				B3986EA36E584C17CEF4697E /* Embed Foundation Extensions */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				FE1373AEC6E6929811E94555 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			packageProductDependencies = (
@@ -179,6 +232,23 @@
 			productName = Runner;
 			productReference = 97C146EE1CF9000F007C117D /* Runner.app */;
 			productType = "com.apple.product-type.application";
+		};
+		8ECD3AA447599E43A09BED6C /* TunteuniWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F4604DB22798859080B85C97 /* Build configuration list for PBXNativeTarget "TunteuniWidget" */;
+			buildPhases = (
+				F537D13B78DAE4D5C5219D8C /* Sources */,
+				2A70E730381355031C10B033 /* Frameworks */,
+				78FF7C9F819A69DB0D62A233 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TunteuniWidget;
+			productName = TunteuniWidget;
+			productReference = A075F792833F8980FC35F32D /* TunteuniWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -197,6 +267,9 @@
 					97C146ED1CF9000F007C117D = {
 						CreatedOnToolsVersion = 7.3.1;
 						LastSwiftMigration = 1100;
+					};
+					8ECD3AA447599E43A09BED6C = {
+						CreatedOnToolsVersion = 15.0;
 					};
 				};
 			};
@@ -219,6 +292,7 @@
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
 				331C8080294A63A400263BE5 /* RunnerTests */,
+				8ECD3AA447599E43A09BED6C /* TunteuniWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -239,6 +313,13 @@
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		78FF7C9F819A69DB0D62A233 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -300,6 +381,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F537D13B78DAE4D5C5219D8C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DA127B859404BA244A99E8AD /* TunteuniWidgets.swift in Sources */,
+				4A1092394810963EC2866CBB /* WidgetViews.swift in Sources */,
+				9A2325AB8A87A77504CE735F /* WidgetStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -307,6 +398,11 @@
 			isa = PBXTargetDependency;
 			target = 97C146ED1CF9000F007C117D /* Runner */;
 			targetProxy = 331C8085294A63A400263BE5 /* PBXContainerItemProxy */;
+		};
+		FE1373AEC6E6929811E94555 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8ECD3AA447599E43A09BED6C /* TunteuniWidget */;
+			targetProxy = 749FCE4395057E7EEA04991E /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -610,6 +706,88 @@
 			};
 			name = Release;
 		};
+		414E2B17940B0EA553A11B9B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 001328C731C1F96E9E06B965 /* Widget.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = TunteuniWidget/TunteuniWidget.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				INFOPLIST_FILE = TunteuniWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.happypi.parentingLog.TunteuniWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		004BE6D4CFF64413E439561D /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 001328C731C1F96E9E06B965 /* Widget.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = TunteuniWidget/TunteuniWidget.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				INFOPLIST_FILE = TunteuniWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.happypi.parentingLog.TunteuniWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		5FDA29667D188C695444BC3A /* Profile */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 001328C731C1F96E9E06B965 /* Widget.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = TunteuniWidget/TunteuniWidget.entitlements;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				INFOPLIST_FILE = TunteuniWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.happypi.parentingLog.TunteuniWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Profile;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -639,6 +817,16 @@
 				97C147061CF9000F007C117D /* Debug */,
 				97C147071CF9000F007C117D /* Release */,
 				249021D4217E4FDB00AE95B9 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F4604DB22798859080B85C97 /* Build configuration list for PBXNativeTarget "TunteuniWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				414E2B17940B0EA553A11B9B /* Debug */,
+				004BE6D4CFF64413E439561D /* Release */,
+				5FDA29667D188C695444BC3A /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -19,13 +19,27 @@ abstract class ActivityRepository {
 
   /// 이유식 시트의 "최근 사용한 식재료" 칩용.
   Future<List<String>> recentFoods({int limit = 5});
+
+  /// 동기화: [sinceSec] 이후 바뀐 기록(예시 데이터 제외, 삭제 포함).
+  Future<List<Activity>> changedSince(int sinceSec);
+
+  /// 동기화: 서버에서 받은 기록 반영(더 최신일 때만 덮어씀).
+  Future<void> applyRemote(List<Activity> activities);
 }
+
+/// 예시(시드) 기록의 작성자 값. 동기화로 올리지 않는다.
+const kSeedCreatedBy = 'seed';
 
 class DriftActivityRepository implements ActivityRepository {
   final AppDatabase db;
   final Uuid _uuid;
 
-  DriftActivityRepository(this.db, {Uuid? uuid}) : _uuid = uuid ?? const Uuid();
+  /// 가족 공유에서 쓰는 내 이름(엄마/아빠). 새 기록의 작성자로 남는다.
+  final String Function() memberName;
+
+  DriftActivityRepository(this.db, {Uuid? uuid, String Function()? memberName})
+    : _uuid = uuid ?? const Uuid(),
+      memberName = memberName ?? (() => 'me');
 
   Activity _toDomain(ActivityRow r) => Activity(
     id: r.id,
@@ -93,12 +107,19 @@ class DriftActivityRepository implements ActivityRepository {
             startedAt: a.startedAt,
             endedAt: Value(a.endedAt),
             payload: Value(a.payloadJson),
-            createdBy: Value(a.createdBy),
+            createdBy: Value(
+              a.createdBy == 'me' ? memberName() : a.createdBy,
+            ),
             createdAt: now,
             updatedAt: now,
           ),
         );
-    return a.copyWith(id: id, createdAt: now, updatedAt: now);
+    return a.copyWith(
+      id: id,
+      createdAt: now,
+      updatedAt: now,
+      createdBy: a.createdBy == 'me' ? memberName() : a.createdBy,
+    );
   }
 
   @override
@@ -117,9 +138,58 @@ class DriftActivityRepository implements ActivityRepository {
 
   @override
   Future<void> softDelete(String id) async {
+    // updatedAt도 바꿔야 동기화로 삭제가 상대 폰에 전달된다.
+    final now = DateTime.now();
     await (db.update(db.activities)..where((t) => t.id.equals(id))).write(
-      ActivitiesCompanion(deletedAt: Value(DateTime.now())),
+      ActivitiesCompanion(deletedAt: Value(now), updatedAt: Value(now)),
     );
+  }
+
+  @override
+  Future<List<Activity>> changedSince(int sinceSec) async {
+    final since = DateTime.fromMillisecondsSinceEpoch(sinceSec * 1000);
+    final q = db.select(db.activities)
+      ..where(
+        (t) =>
+            t.updatedAt.isBiggerThanValue(since) &
+            t.createdBy.equals(kSeedCreatedBy).not(),
+      );
+    final rows = await q.get();
+    return rows.map(_toDomain).toList();
+  }
+
+  @override
+  Future<void> applyRemote(List<Activity> activities) async {
+    if (activities.isEmpty) return;
+    int sec(DateTime d) => d.millisecondsSinceEpoch ~/ 1000;
+    var changed = 0;
+    await db.transaction(() async {
+      for (final a in activities) {
+        await db.customStatement(
+          'INSERT INTO activities (id, type, started_at, ended_at, payload, created_by, created_at, updated_at, deleted_at) '
+          'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) '
+          'ON CONFLICT(id) DO UPDATE SET type = excluded.type, started_at = excluded.started_at, '
+          'ended_at = excluded.ended_at, payload = excluded.payload, created_by = excluded.created_by, '
+          'created_at = excluded.created_at, updated_at = excluded.updated_at, deleted_at = excluded.deleted_at '
+          'WHERE excluded.updated_at > activities.updated_at',
+          [
+            a.id,
+            a.type.name,
+            sec(a.startedAt),
+            a.endedAt == null ? null : sec(a.endedAt!),
+            a.payloadJson,
+            a.createdBy,
+            sec(a.createdAt),
+            sec(a.updatedAt),
+            a.deletedAt == null ? null : sec(a.deletedAt!),
+          ],
+        );
+        final r = await db.customSelect('SELECT changes() AS c').getSingle();
+        changed += r.data['c'] as int;
+      }
+    });
+    // 서버가 내가 보낸 걸 되돌려준 것뿐이면(바뀐 행 없음) 화면·위젯·동기화를 깨우지 않는다.
+    if (changed > 0) db.markTablesUpdated({db.activities});
   }
 
   @override

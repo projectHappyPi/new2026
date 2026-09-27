@@ -239,7 +239,11 @@ class _TimelineRow extends ConsumerWidget {
                   ),
                 ),
               Text(
-                activity.createdBy == 'me' ? '나' : activity.createdBy,
+                switch (activity.createdBy) {
+                  'me' => '나',
+                  'seed' => '예시',
+                  final name => name,
+                },
                 style: AppTypography.monoSmall.copyWith(color: colors.muted),
               ),
             ],

@@ -9,7 +9,10 @@ import '../pattern/pattern_screen.dart';
 import '../record/record_screen.dart';
 import '../settings/settings_screen.dart';
 import '../timeline/timeline_screen.dart';
+import '../../data/sync/sync_service.dart';
+import '../calendar/calendar_screen.dart';
 import '../voice/voice_launch.dart';
+import '../widgets/widget_bridge.dart';
 import '../voice/voice_recorder.dart';
 
 class AppShell extends ConsumerStatefulWidget {
@@ -26,6 +29,7 @@ class _AppShellState extends ConsumerState<AppShell>
   static const _tabs = [
     (icon: Icons.edit_note_rounded, label: '기록'),
     (icon: Icons.view_list_rounded, label: '타임라인'),
+    (icon: Icons.calendar_month_rounded, label: '달력'),
     (icon: Icons.donut_large_rounded, label: '패턴'),
     (icon: Icons.settings_rounded, label: '설정'),
   ];
@@ -35,6 +39,9 @@ class _AppShellState extends ConsumerState<AppShell>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     VoiceLaunch.onListen(_openVoiceFromLaunch);
+    // 가족 공유(30초 폴링)와 홈 화면 위젯 갱신을 시작한다.
+    ref.read(syncServiceProvider).start();
+    ref.read(widgetBridgeProvider).start();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (await VoiceLaunch.consumePendingListen()) _openVoiceFromLaunch();
     });
@@ -60,6 +67,12 @@ class _AppShellState extends ConsumerState<AppShell>
     // 쓰기를 모르므로, 포그라운드로 돌아올 때마다 강제로 다시 읽게 한다.
     if (state == AppLifecycleState.resumed) {
       ref.read(databaseProvider).notifyExternalWrite();
+      ref.read(syncServiceProvider).start();
+      ref.read(widgetBridgeProvider).reload();
+    } else if (state == AppLifecycleState.paused) {
+      // 백그라운드에서는 폴링을 멈춘다(다시 켜질 때 바로 동기화).
+      ref.read(syncServiceProvider).stop();
+      ref.read(widgetBridgeProvider).reload();
     }
   }
 
@@ -76,6 +89,7 @@ class _AppShellState extends ConsumerState<AppShell>
         children: const [
           RecordScreen(),
           TimelineScreen(),
+          CalendarScreen(),
           PatternScreen(),
           SettingsScreen(),
         ],

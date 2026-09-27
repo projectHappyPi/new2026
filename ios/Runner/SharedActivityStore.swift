@@ -1,5 +1,6 @@
 import Foundation
 import SQLite3
+import WidgetKit
 
 /// Flutter 쪽 lib/data/db/database.dart(drift)가 쓰는 것과 완전히 같은
 /// 스키마(테이블 activities)에, drift 없이 SQLite C API로 최소한의 코드만
@@ -62,7 +63,7 @@ enum SharedActivityStore {
       let sql = """
         INSERT INTO activities
           (id, type, started_at, ended_at, payload, created_by, created_at, updated_at, deleted_at)
-        VALUES (?, ?, ?, ?, ?, 'me', ?, ?, NULL)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL)
         """
       try execute(db, sql) { stmt in
         sqlite3_bind_text(stmt, 1, UUID().uuidString.lowercased(), -1, SQLITE_TRANSIENT)
@@ -74,10 +75,23 @@ enum SharedActivityStore {
           sqlite3_bind_null(stmt, 4)
         }
         sqlite3_bind_text(stmt, 5, json, -1, SQLITE_TRANSIENT)
-        sqlite3_bind_int64(stmt, 6, now)
+        sqlite3_bind_text(stmt, 6, memberName(), -1, SQLITE_TRANSIENT)
         sqlite3_bind_int64(stmt, 7, now)
+        sqlite3_bind_int64(stmt, 8, now)
       }
     }
+    WidgetCenter.shared.reloadAllTimelines()
+  }
+
+  /// 가족 공유에서 정한 내 이름(앱이 위젯 설정과 함께 넘겨준 값). 없으면 'me'.
+  private static func memberName() -> String {
+    guard
+      let raw = UserDefaults(suiteName: appGroupId)?.string(forKey: "widgetConfig"),
+      let data = raw.data(using: .utf8),
+      let j = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+      let name = j["memberName"] as? String, !name.isEmpty
+    else { return "me" }
+    return name
   }
 
   /// 진행 중(ended_at IS NULL)인 가장 최근 [type] 기록.
@@ -115,6 +129,7 @@ enum SharedActivityStore {
         sqlite3_bind_text(stmt, 3, id, -1, SQLITE_TRANSIENT)
       }
     }
+    WidgetCenter.shared.reloadAllTimelines()
   }
 
   // MARK: - 내부

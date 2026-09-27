@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/activity_type.dart';
+import '../repositories/activity_repository.dart' show kSeedCreatedBy;
 import 'database.dart';
 
 const _uuid = Uuid();
@@ -52,6 +53,8 @@ ActivitiesCompanion _row({
     startedAt: startedAt,
     endedAt: Value(endedAt),
     payload: Value(jsonEncode(payload)),
+    // 예시 기록은 가족 공유(동기화)로 올리지 않는다.
+    createdBy: const Value(kSeedCreatedBy),
     createdAt: startedAt,
     updatedAt: startedAt,
   );

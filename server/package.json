@@ -1,0 +1,13 @@
+{
+  "name": "tunteuni-sync",
+  "version": "1.0.0",
+  "private": true,
+  "description": "튼튼이 가족 동기화 서버 (기록·일정 공유)",
+  "type": "module",
+  "main": "src/server.js",
+  "engines": { "node": ">=22.13" },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/*.test.js"
+  }
+}

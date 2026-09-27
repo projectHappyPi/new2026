@@ -1,0 +1,21 @@
+# 튼튼이 동기화 서버 + Cloudflare Tunnel (베베로그와 같은 방식)
+#   1) cp .env.example .env  후 FAMILY_CODE, TUNNEL_TOKEN 채우기
+#   2) docker compose up -d
+#   3) 앱 설정 > 가족 공유 에 https://<터널 주소> 와 FAMILY_CODE 입력 (두 폰 모두)
+services:
+  sync:
+    build: .
+    restart: unless-stopped
+    environment:
+      FAMILY_CODE: ${FAMILY_CODE:?FAMILY_CODE를 .env에 넣어 주세요}
+    volumes:
+      - ./data:/data
+    # 같은 PC에서 테스트할 때만 열기
+    # ports: ["8787:8787"]
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:?TUNNEL_TOKEN을 .env에 넣어 주세요}
+    depends_on: [sync]

@@ -1,6 +1,9 @@
 package com.happypi.parenting_log
 
+import android.content.Context
 import android.content.Intent
+import com.happypi.parenting_log.widget.WidgetData
+import com.happypi.parenting_log.widget.WidgetRender
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -20,6 +23,23 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         pendingLaunch = parseLaunch(intent)
+        // 위젯 채널: 위젯 설정 저장 + 다시 그리기 (lib/features/widgets/widget_bridge.dart)
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, WIDGET_CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "saveConfig" -> {
+                    val json = call.argument<String>("json")
+                    getSharedPreferences(WidgetData.PREFS, Context.MODE_PRIVATE)
+                        .edit().putString(WidgetData.KEY_CONFIG, json).apply()
+                    WidgetRender.updateAll(applicationContext)
+                    result.success(null)
+                }
+                "reload" -> {
+                    WidgetRender.updateAll(applicationContext)
+                    result.success(null)
+                }
+                else -> result.notImplemented()
+            }
+        }
         channel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).also {
             it.setMethodCallHandler { call, result ->
                 when (call.method) {
@@ -65,5 +85,6 @@ class MainActivity : FlutterActivity() {
 
     companion object {
         private const val CHANNEL = "com.happypi.parentingLog/voice_launch"
+        private const val WIDGET_CHANNEL = "com.happypi.parentingLog/widget"
     }
 }

@@ -40,6 +40,30 @@
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts"/>
         </activity>
+        <!-- 홈 화면 위젯: 튼튼이 상태 / 튼튼이 달력 -->
+        <receiver
+            android:name=".widget.StatusWidgetProvider"
+            android:label="@string/widget_status_name"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="com.happypi.parenting_log.widget.REFRESH"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_status_info"/>
+        </receiver>
+        <receiver
+            android:name=".widget.CalendarWidgetProvider"
+            android:label="@string/widget_calendar_name"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_calendar_info"/>
+        </receiver>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

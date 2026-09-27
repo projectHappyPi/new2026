@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/cal_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg_dark"
+    android:orientation="vertical"
+    android:padding="14dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- 왼쪽 위: 오늘 일정 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="10dp"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/cal_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFFFF"/>
+            <LinearLayout
+                android:id="@+id/cal_today"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="vertical"/>
+        </LinearLayout>
+
+        <!-- 오른쪽 위: 튼튼이 상태 (끄면 다가오는 일정) -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <include layout="@layout/widget_status_block"/>
+            <LinearLayout
+                android:id="@+id/cal_upcoming"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+        <TextView android:id="@+id/wd0" style="@style/WidgetWeekday" android:text="일"/>
+        <TextView android:id="@+id/wd1" style="@style/WidgetWeekday" android:text="월"/>
+        <TextView android:id="@+id/wd2" style="@style/WidgetWeekday" android:text="화"/>
+        <TextView android:id="@+id/wd3" style="@style/WidgetWeekday" android:text="수"/>
+        <TextView android:id="@+id/wd4" style="@style/WidgetWeekday" android:text="목"/>
+        <TextView android:id="@+id/wd5" style="@style/WidgetWeekday" android:text="금"/>
+        <TextView android:id="@+id/wd6" style="@style/WidgetWeekday" android:text="토"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/cal_grid"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"/>
+</LinearLayout>

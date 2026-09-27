@@ -2,4 +2,8 @@
 <resources>
     <string name="shortcut_voice_short">말로 기록</string>
     <string name="shortcut_voice_long">튼튼이 말로 기록</string>
+    <string name="widget_status_name">튼튼이 상태</string>
+    <string name="widget_status_desc">마지막 수유·다음 수유·수면을 초 단위로</string>
+    <string name="widget_calendar_name">튼튼이 달력</string>
+    <string name="widget_calendar_desc">가족 일정 달력과 수유·수면 상태</string>
 </resources>
