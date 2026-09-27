@@ -47,6 +47,9 @@ class _DetailSheetState extends ConsumerState<DetailSheet> {
   DateTime? _editStartedAt;
   DateTime? _editEndedAt;
   SleepPeriod? _sleepPeriod;
+  late double _celsius;
+  late TextEditingController _medicineCtrl;
+  late TextEditingController _bathNoteCtrl;
 
   bool get _isEditing => widget.editing != null;
 
@@ -64,6 +67,9 @@ class _DetailSheetState extends ConsumerState<DetailSheet> {
     _editStartedAt = e?.startedAt;
     _editEndedAt = e?.endedAt;
     _sleepPeriod = e?.sleepPeriod;
+    _celsius = e?.celsius ?? TemperaturePresets.defaultCelsius;
+    _medicineCtrl = TextEditingController(text: e?.medicine ?? '');
+    _bathNoteCtrl = TextEditingController(text: e?.note ?? '');
 
     if (!_isEditing && widget.type == ActivityType.formula) {
       Future.microtask(() async {
@@ -83,6 +89,8 @@ class _DetailSheetState extends ConsumerState<DetailSheet> {
   void dispose() {
     _diaperNoteCtrl.dispose();
     _solidNoteCtrl.dispose();
+    _medicineCtrl.dispose();
+    _bathNoteCtrl.dispose();
     super.dispose();
   }
 
@@ -103,10 +111,20 @@ class _DetailSheetState extends ConsumerState<DetailSheet> {
       case ActivityType.solid:
         final foods =
             ref.read(recentFoodsProvider).valueOrNull ?? const <String>[];
-        final food =
-            _solidFood ??
-            (foods.isNotEmpty ? foods.first : SolidDefaults.foods.first);
-        final payload = <String, dynamic>{'food': food, 'amount': _solidAmount};
+        // 말로 기록한 이유식(식재료 없음)을 수정할 때는 식재료를 임의로 채우지 않는다.
+        final keepNoFood =
+            _isEditing && widget.editing!.food == null && _solidFood == null;
+        final food = keepNoFood
+            ? null
+            : _solidFood ??
+                  (foods.isNotEmpty ? foods.first : SolidDefaults.foods.first);
+        final payload = <String, dynamic>{
+          if (food != null) 'food': food,
+          'amount': _solidAmount,
+        };
+        // 말로 기록한 이유식 용량(ml)은 시트에 입력 칸이 없으므로 그대로 보존한다.
+        final voiceMl = widget.editing?.ml;
+        if (voiceMl != null) payload['ml'] = voiceMl;
         final note = _solidNoteCtrl.text.trim();
         if (note.isNotEmpty) payload['note'] = note;
         result = await _persist(actions, payload);
@@ -140,6 +158,16 @@ class _DetailSheetState extends ConsumerState<DetailSheet> {
           );
           result = await actions.startRange(widget.type, startedAt: startedAt);
         }
+      case ActivityType.bath:
+        final note = _bathNoteCtrl.text.trim();
+        result = await _persist(actions, {if (note.isNotEmpty) 'note': note});
+      case ActivityType.temperature:
+        result = await _persist(actions, {'celsius': _celsius});
+      case ActivityType.medicine:
+        final name = _medicineCtrl.text.trim();
+        result = await _persist(actions, {
+          if (name.isNotEmpty) 'medicine': name,
+        });
     }
     if (mounted) Navigator.pop(context, result);
   }
@@ -149,6 +177,8 @@ class _DetailSheetState extends ConsumerState<DetailSheet> {
     Map<String, dynamic> payload,
   ) {
     if (_isEditing) {
+      // 말로 기록한 항목이라는 표시는 수정해도 남긴다.
+      if (widget.editing!.viaVoice) payload = {...payload, 'via': 'voice'};
       final updated = widget.editing!.copyWith(
         payload: payload,
         startedAt: _editStartedAt,
@@ -244,7 +274,119 @@ class _DetailSheetState extends ConsumerState<DetailSheet> {
             : _buildRangeStart(context);
       case ActivityType.breast:
         return _isEditing ? const SizedBox.shrink() : _buildRangeStart(context);
+      case ActivityType.bath:
+        return _NoteField(controller: _bathNoteCtrl);
+      case ActivityType.temperature:
+        return _buildTemperature(context);
+      case ActivityType.medicine:
+        return _buildMedicine(context);
     }
+  }
+
+  Widget _buildTemperature(BuildContext context) {
+    final colors = context.colors;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final c in TemperaturePresets.presets)
+              _Chip(
+                label: '$c℃',
+                selected: (_celsius - c).abs() < 0.05,
+                onTap: () => setState(() => _celsius = c),
+              ),
+          ],
+        ),
+        const SizedBox(height: 24),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '직접 조절 · 0.1℃ 단위',
+              style: AppTypography.label.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
+            ),
+            Text(
+              '${_celsius.toStringAsFixed(1)}℃',
+              style: AppTypography.mono.tabular.copyWith(
+                color: colors.onSurface,
+              ),
+            ),
+          ],
+        ),
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            activeTrackColor: colors.onSurface,
+            inactiveTrackColor: colors.outlineSoft,
+            thumbColor: colors.onSurface,
+            overlayColor: colors.onSurface.withValues(alpha: 0.1),
+          ),
+          child: Slider(
+            value: _celsius.clamp(
+              TemperaturePresets.min,
+              TemperaturePresets.max,
+            ),
+            min: TemperaturePresets.min,
+            max: TemperaturePresets.max,
+            divisions:
+                ((TemperaturePresets.max - TemperaturePresets.min) * 10)
+                    .round(),
+            onChanged: (v) =>
+                setState(() => _celsius = (v * 10).round() / 10),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMedicine(BuildContext context) {
+    final colors = context.colors;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '약 이름',
+          style: AppTypography.label.copyWith(color: colors.onSurfaceVariant),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final m in MedicinePresets.names)
+              _Chip(
+                label: m,
+                selected: _medicineCtrl.text.trim() == m,
+                onTap: () => setState(() => _medicineCtrl.text = m),
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _medicineCtrl,
+          onChanged: (_) => setState(() {}),
+          style: AppTypography.body.copyWith(color: colors.onSurface),
+          decoration: InputDecoration(
+            hintText: '약 이름 (선택)',
+            hintStyle: AppTypography.body.copyWith(color: colors.muted),
+            filled: true,
+            fillColor: colors.surfaceVariant,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 10,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildFormula(BuildContext context) {

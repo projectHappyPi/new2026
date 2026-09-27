@@ -22,7 +22,7 @@ class ParentingLogApp extends ConsumerWidget {
     );
 
     return MaterialApp(
-      title: '육아 기록',
+      title: '튼튼이',
       debugShowCheckedModeBanner: false,
       themeMode: resolveThemeMode(settings, now),
       theme: lightTheme,

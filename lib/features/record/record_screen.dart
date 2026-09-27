@@ -13,6 +13,8 @@ import '../../data/models/settings.dart';
 import '../../providers/activity_provider.dart';
 import '../../providers/running_provider.dart';
 import '../../providers/settings_provider.dart';
+import '../voice/voice_recorder.dart';
+import '../voice/voice_sheet.dart';
 import 'detail_sheet.dart';
 import 'widgets/grid_layout.dart';
 import 'widgets/running_banner.dart';
@@ -110,10 +112,12 @@ class _RecordScreenState extends ConsumerState<RecordScreen> {
     await showDetailSheet(context, type: a.type, editing: a);
   }
 
-  void _onEditButtons() {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('버튼 구성 편집은 다음 업데이트에서 제공됩니다')));
+  /// 말로 기록: 저장되면 버튼 짧은 탭과 똑같이 체크 표시 + 실행 취소 토스트를 띄운다.
+  Future<void> _openVoice() async {
+    final saved = await showVoiceSheet(context);
+    if (saved == null || !mounted) return;
+    if (kThumbArcOrder.contains(saved.type)) _showSavedCheckmark(saved.type);
+    _showUndoToast(saved);
   }
 
   Map<ActivityType, String> _valuePreviews(
@@ -140,6 +144,9 @@ class _RecordScreenState extends ConsumerState<RecordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 앱 바로가기·딥링크(tunteuni://voice)로 들어오면 곧바로 음성 시트를 연다.
+    ref.listen<int>(voiceLaunchTickProvider, (_, _) => _openVoice());
+
     final colors = context.colors;
     final settings = ref.watch(settingsProvider);
     final running = ref.watch(runningActivityProvider).valueOrNull;
@@ -181,7 +188,7 @@ class _RecordScreenState extends ConsumerState<RecordScreen> {
                           nightModeActive: nightModeActive,
                           onShortTap: _handleShortTap,
                           onLongPress: _handleLongPress,
-                          onEditButtons: _onEditButtons,
+                          onVoice: _openVoice,
                         )
                       : SingleChildScrollView(
                           child: Padding(
@@ -192,7 +199,7 @@ class _RecordScreenState extends ConsumerState<RecordScreen> {
                               valuePreviews: previews,
                               onShortTap: _handleShortTap,
                               onLongPress: _handleLongPress,
-                              onEditButtons: _onEditButtons,
+                              onVoice: _openVoice,
                             ),
                           ),
                         ),

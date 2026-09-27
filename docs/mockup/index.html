@@ -1,0 +1,614 @@
+<title>튼튼이 말로 기록</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #EEF0F6;
+    --surface: #FFFFFF;
+    --ink: #1B1E2A;
+    --muted: #666B80;
+    --line: #D9DCE7;
+    --accent: #4F58A3;
+    --accent-soft: #E3E5F4;
+    --err: #B0503A;
+    /* 폰 화면: 앱의 다크(야간) 토큰 — lib/core/theme 기준, 테마와 무관하게 고정 */
+    --p-bg: #0F1117;
+    --p-surface: #181B23;
+    --p-variant: #20242E;
+    --p-outline: #343947;
+    --p-soft: #262A35;
+    --p-on: #E9EAF0;
+    --p-on-var: #A3A7B6;
+    --p-muted: #6E7385;
+    --formula: #E5B478; --sleep: #8189C9; --solid: #9CAF6C; --pee: #6FA79E;
+    --poop: #A8794F; --breast: #D4909B; --bath: #6FA0C9; --temperature: #D9826A; --medicine: #B08FCB;
+    --sans: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #0B0D12; --surface: #14171F; --ink: #E6E8F0; --muted: #8B90A4;
+      --line: #272B37; --accent: #8189C9; --accent-soft: #1E2233; --err: #E08E78;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0B0D12; --surface: #14171F; --ink: #E6E8F0; --muted: #8B90A4;
+    --line: #272B37; --accent: #8189C9; --accent-soft: #1E2233; --err: #E08E78;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--ink); font-family: var(--sans);
+    font-size: 15px; line-height: 1.55; padding-inline: 20px; padding-block: 28px 56px;
+    word-break: keep-all; overflow-wrap: anywhere;
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 28px; }
+  header.top { display: grid; gap: 6px; max-width: 70ch; }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; color: var(--accent); text-transform: uppercase; }
+  h1 { font-size: clamp(26px, 4vw, 34px); line-height: 1.2; margin: 0; font-weight: 700; text-wrap: balance; letter-spacing: -0.01em; }
+  h2 { font-size: 17px; margin: 0; font-weight: 600; text-wrap: balance; }
+  p { margin: 0; }
+  .lede { color: var(--muted); }
+
+  /* 명령 바 */
+  .commands { display: grid; gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+  .commands-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .hint { color: var(--muted); font-size: 13px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    font: inherit; font-size: 14px; border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+    padding: 7px 12px; border-radius: 999px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .chip:hover { border-color: var(--accent); }
+  .chip:focus-visible, .say-row button:focus-visible, .say-row input:focus-visible, .undo button:focus-visible, .p-mic:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .chip .n { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .chip[disabled] { opacity: .5; cursor: progress; }
+  .say-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .say-row input {
+    flex: 1 1 240px; min-width: 0; font: inherit; padding: 9px 12px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--ink);
+  }
+  .say-row button {
+    font: inherit; font-weight: 600; padding: 9px 16px; border-radius: 10px; border: 0;
+    background: var(--accent); color: #fff; cursor: pointer;
+  }
+  :root[data-theme="dark"] .say-row button { color: #0B0D12; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .say-row button { color: #0B0D12; } }
+
+  /* 스테이지 */
+  .stage { display: grid; grid-template-columns: auto auto minmax(260px, 1fr); gap: 28px; align-items: start; }
+  @media (max-width: 1040px) { .stage { grid-template-columns: 1fr 1fr; } .timeline { grid-column: 1 / -1; } }
+  @media (max-width: 700px) { .stage { grid-template-columns: 1fr; justify-items: center; } .timeline { width: 100%; } }
+  .device { display: grid; gap: 10px; justify-items: center; }
+  .device-label { display: grid; gap: 2px; text-align: center; }
+  .device-label strong { font-size: 14px; }
+  .device-label span { color: var(--muted); font-size: 12.5px; }
+
+  .phone {
+    width: 292px; max-width: 100%; aspect-ratio: 292 / 600; position: relative;
+    border-radius: 44px; padding: 10px; background: #05060A; box-shadow: 0 0 0 1px #2A2E3A, 0 18px 40px -18px rgba(10, 12, 30, .45);
+  }
+  .phone.galaxy { border-radius: 30px; }
+  .screen {
+    position: relative; width: 100%; height: 100%; border-radius: 35px; overflow: hidden;
+    background: var(--p-bg); color: var(--p-on); font-size: 12px;
+  }
+  .galaxy .screen { border-radius: 22px; }
+  .notch { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 88px; height: 24px; border-radius: 14px; background: #000; z-index: 30; }
+  .punch { position: absolute; top: 9px; left: 50%; transform: translateX(-50%); width: 10px; height: 10px; border-radius: 50%; background: #000; z-index: 30; }
+  .statusbar { height: 38px; display: flex; justify-content: space-between; align-items: center; padding: 0 22px; font-family: var(--mono); font-size: 11px; color: var(--p-on-var); }
+  .galaxy .statusbar { height: 28px; padding: 0 16px; }
+
+  .app { position: absolute; inset: 38px 0 0 0; display: flex; flex-direction: column; }
+  .galaxy .app { inset: 28px 0 0 0; }
+  .p-header { padding: 10px 18px 0; display: grid; gap: 2px; }
+  .p-age { font-family: var(--mono); font-size: 10.5px; color: var(--p-muted); }
+  .p-last { display: flex; align-items: baseline; gap: 6px; }
+  .p-last b { font-family: var(--mono); font-size: 26px; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; }
+  .p-last span { color: var(--p-on-var); font-size: 11px; }
+  .p-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; }
+  .p-metrics div { background: var(--p-surface); border: 1px solid var(--p-soft); border-radius: 8px; padding: 5px 7px; display: grid; }
+  .p-metrics small { color: var(--p-muted); font-size: 9.5px; }
+  .p-metrics b { font-family: var(--mono); font-weight: 500; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .p-banner { margin: 8px 18px 0; border-radius: 10px; padding: 7px 10px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; background: color-mix(in srgb, var(--sleep) 22%, transparent); border: 1px solid var(--sleep); }
+  .p-banner b { font-family: var(--mono); font-weight: 500; }
+  .arc { position: relative; flex: 1; }
+  .arc svg.guide { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .qb { position: absolute; width: 50px; display: grid; justify-items: center; gap: 2px; transform: translate(-50%, -25px); }
+  .qb .c {
+    width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--p-variant); border: 1px solid var(--p-outline); transition: background .15s, border-color .15s;
+  }
+  .qb svg { width: 20px; height: 20px; fill: var(--p-on); }
+  .qb .l { font-size: 10px; color: var(--p-on-var); white-space: nowrap; }
+  .qb .v { font-family: var(--mono); font-size: 9px; color: var(--p-muted); }
+  .qb.saved .c { border-color: var(--k); background: color-mix(in srgb, var(--k) 22%, transparent); }
+  .qb.saved svg { fill: var(--k); }
+  .qb.running .c { border-color: var(--k); background: color-mix(in srgb, var(--k) 28%, transparent); border-width: 1.5px; }
+  .p-mic { font: inherit; padding: 0; border: 0; background: none; color: inherit; cursor: pointer; }
+  .p-mic .c { background: color-mix(in srgb, var(--p-on) 8%, transparent); border: 1.5px solid var(--p-on); }
+  .tabs { height: 46px; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--p-soft); background: var(--p-surface); font-size: 9.5px; color: var(--p-muted); }
+  .tabs span { display: grid; place-items: center; }
+  .tabs span.on { color: var(--p-on); }
+  .homebar { height: 18px; background: var(--p-surface); display: grid; place-items: center; }
+  .homebar i { width: 96px; height: 4px; border-radius: 2px; background: var(--p-outline); }
+
+  /* 되돌리기 토스트 */
+  .undo {
+    position: absolute; left: 12px; right: 12px; bottom: 74px; z-index: 12; background: var(--p-surface);
+    border: 1px solid var(--p-outline); border-radius: 10px; padding: 6px 4px 6px 12px; display: flex; align-items: center; gap: 4px;
+    font-size: 11.5px; transform: translateY(8px); opacity: 0; transition: opacity .2s, transform .2s; pointer-events: none;
+  }
+  .undo.show { opacity: 1; transform: none; pointer-events: auto; }
+  .undo .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .undo button { font: inherit; font-size: 11px; background: none; border: 0; color: var(--p-on-var); padding: 4px 6px; cursor: pointer; }
+  .undo button.strong { color: var(--p-on); font-weight: 600; }
+
+  /* 말로 기록 시트 (Galaxy · 앱 마이크) */
+  .scrim { position: absolute; inset: 0; background: rgba(0,0,0,.45); opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 14; }
+  .sheet {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 15; background: var(--p-surface);
+    border-radius: 18px 18px 0 0; padding: 8px 16px 18px; display: grid; gap: 10px; justify-items: center;
+    transform: translateY(105%); transition: transform .25s ease;
+  }
+  .voice-open .scrim { opacity: 1; }
+  .voice-open .sheet { transform: none; }
+  .sheet .grab { width: 30px; height: 3px; border-radius: 2px; background: var(--p-outline); }
+  .sheet h3 { margin: 0; font-size: 13px; font-weight: 600; justify-self: start; }
+  .bigmic { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; border: 1px solid var(--p-outline); background: var(--p-variant); position: relative; }
+  .bigmic svg { width: 28px; height: 28px; fill: var(--p-on); }
+  .listening .bigmic { border: 2px solid var(--p-on); background: color-mix(in srgb, var(--p-on) 14%, transparent); }
+  .listening .bigmic::after { content: ""; position: absolute; inset: -8px; border-radius: 50%; border: 1px solid var(--p-on); opacity: .35; animation: pulse 1.2s ease-out infinite; }
+  @keyframes pulse { from { transform: scale(.9); opacity: .5; } to { transform: scale(1.25); opacity: 0; } }
+  .heard { font-size: 13px; min-height: 20px; text-align: center; }
+  .msg { font-size: 11.5px; color: var(--p-on-var); text-align: center; min-height: 18px; }
+  .msg.ok { color: var(--p-on); font-weight: 600; }
+  .msg.bad { color: var(--temperature); }
+
+  /* 시리 (iPhone) */
+  .lock { position: absolute; inset: 0; display: grid; align-content: start; justify-items: center; padding-top: 70px; gap: 2px; z-index: 5; transition: opacity .25s; }
+  .lock .date { font-size: 12px; color: var(--p-on-var); }
+  .lock .clock { font-size: 64px; font-weight: 300; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; font-family: var(--sans); }
+  .lock .note { margin-top: 26px; width: calc(100% - 28px); background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 10px 12px; display: grid; gap: 3px; }
+  .lock .note small { color: var(--p-muted); font-size: 10px; }
+  .lock .note p { font-size: 12px; }
+  .lockbg { position: absolute; inset: 0; background: radial-gradient(120% 70% at 50% 110%, #1D2244 0%, #0F1117 60%); }
+  .siri-edge { position: absolute; inset: 0; border-radius: inherit; z-index: 20; pointer-events: none; opacity: 0; transition: opacity .25s;
+    box-shadow: inset 0 0 0 3px #7C8CFF, inset 0 0 22px 6px rgba(160, 110, 255, .55), inset 0 -10px 30px 6px rgba(255, 130, 170, .35); }
+  .siri-on .siri-edge { opacity: 1; animation: glow 2.4s ease-in-out infinite; }
+  @keyframes glow { 50% { box-shadow: inset 0 0 0 3px #FF8FB1, inset 0 0 26px 8px rgba(110, 170, 255, .55), inset 0 -10px 30px 6px rgba(160, 110, 255, .4); } }
+  .siri { position: absolute; left: 12px; right: 12px; bottom: 30px; z-index: 21; display: grid; gap: 8px; opacity: 0; transform: translateY(10px); transition: opacity .25s, transform .25s; }
+  .siri-on .siri { opacity: 1; transform: none; }
+  .bubble { padding: 10px 12px; border-radius: 16px; font-size: 12.5px; line-height: 1.45; }
+  .bubble.me { justify-self: end; background: rgba(255,255,255,.12); max-width: 88%; }
+  .bubble.siri-say { background: rgba(20, 22, 32, .92); border: 1px solid rgba(255,255,255,.1); display: grid; gap: 6px; }
+  .bubble.siri-say .app-row { display: flex; align-items: center; gap: 6px; color: var(--p-muted); font-size: 10.5px; }
+  .appicon { width: 16px; height: 16px; border-radius: 4px; background: var(--sleep); display: grid; place-items: center; }
+  .appicon svg { width: 11px; height: 11px; fill: #0F1117; }
+  .bubble[hidden] { display: none; }
+
+  /* 타임라인 */
+  .timeline { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 0 12px; display: grid; gap: 4px; align-content: start; }
+  .tl-head { padding: 0 16px 8px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+  .tl-head .sum { font-family: var(--mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .tl-list { list-style: none; margin: 0; padding: 0; max-height: 540px; overflow-y: auto; }
+  .tl-list li { display: grid; grid-template-columns: 44px 3px 1fr auto; gap: 10px; align-items: center; padding: 9px 16px; border-bottom: 1px solid var(--line); }
+  .tl-list li:last-child { border-bottom: 0; }
+  .tl-list li.fresh { animation: fresh 1.6s ease-out; }
+  @keyframes fresh { from { background: var(--accent-soft); } to { background: transparent; } }
+  .tl-time { font-family: var(--mono); font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .tl-bar { width: 3px; height: 28px; border-radius: 2px; }
+  .tl-main { min-width: 0; display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; }
+  .tl-main b { font-weight: 600; }
+  .tl-main span { color: var(--muted); }
+  .badge { font-family: var(--mono); font-size: 10.5px; padding: 1px 6px; border-radius: 4px; background: var(--accent-soft); color: var(--accent); }
+  .tl-via { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; color: var(--muted); white-space: nowrap; }
+  .tl-via svg { width: 12px; height: 12px; fill: currentColor; }
+  .tl-empty { padding: 16px; color: var(--muted); }
+  .sample-note { padding: 6px 16px 0; font-size: 11.5px; color: var(--muted); }
+
+  /* 하단 안내 */
+  .notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .note-card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 8px; align-content: start; }
+  .note-card ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; color: var(--ink); }
+  .note-card li::marker { color: var(--muted); }
+  .note-card code { font-family: var(--mono); font-size: 12.5px; background: var(--bg); padding: 1px 5px; border-radius: 4px; }
+  .table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+  table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 13.5px; }
+  th, td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 12px; color: var(--muted); font-weight: 500; }
+  tr:last-child td { border-bottom: 0; }
+  td .sw { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; vertical-align: 1px; }
+  td.mono { font-family: var(--mono); font-size: 12.5px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">튼튼이 · 말로 기록 목업</span>
+    <h1>“튼튼이 분유 230ml 먹었어” 한마디로 기록</h1>
+    <p class="lede">아이폰은 시리가 앱을 열지 않고 바로 저장하고, 갤럭시는 앱의 마이크 버튼(엄지 궤적 6번째 자리)으로 말하면 바로 저장돼요. 아래 문장을 누르면 두 기기가 동시에 움직이고, 저장된 기록은 오른쪽 타임라인에 쌓입니다. 인식 규칙은 앱과 같은 코드입니다.</p>
+  </header>
+
+  <section class="commands" aria-labelledby="cmd-title">
+    <div class="commands-head">
+      <h2 id="cmd-title">말해 보기</h2>
+      <span class="hint">잠들었어 → 깼어 순서로 누르면 수면 구간이 닫혀요</span>
+    </div>
+    <div class="chips" id="chips"></div>
+    <form class="say-row" id="say-form">
+      <label for="say-input" class="hint" style="flex-basis:100%">직접 입력 (예: 체온 37도 5부야, 해열제 먹었어, 모유 1시간 먹었어)</label>
+      <input id="say-input" type="text" autocomplete="off" placeholder="튼튼이 이유식 120ml 먹었어">
+      <button type="submit">말하기</button>
+    </form>
+  </section>
+
+  <section class="stage" aria-label="기기 시뮬레이션">
+    <div class="device">
+      <div class="phone iphone" id="iphone">
+        <div class="screen">
+          <div class="notch"></div>
+          <div class="lockbg"></div>
+          <div class="statusbar" style="position:relative;z-index:6"><span class="now-hm">03:12</span><span>5G ▮▮▮</span></div>
+          <div class="lock">
+            <div class="date" id="lock-date">9월 28일 월요일</div>
+            <div class="clock now-hm">03:12</div>
+            <div class="note">
+              <small>시리에게 이렇게 말해 보세요</small>
+              <p>“시리야, 튼튼이 분유 230ml 먹었어”</p>
+            </div>
+          </div>
+          <div class="siri-edge"></div>
+          <div class="siri" aria-live="polite">
+            <div class="bubble me" id="siri-heard">…</div>
+            <div class="bubble siri-say" id="siri-reply" hidden>
+              <div class="app-row"><span class="appicon"><svg viewBox="0 0 24 24"><path d="M12.34 2.02C6.59 1.82 2 6.42 2 12c0 5.52 4.48 10 10 10 3.71 0 6.93-2.02 8.66-5.02-7.51-.25-12.09-8.43-8.32-14.96z"/></svg></span>튼튼이</div>
+              <span id="siri-text"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="device-label"><strong>iPhone · 시리</strong><span>잠금 화면에서도, 앱을 열지 않고 저장</span></div>
+    </div>
+
+    <div class="device">
+      <div class="phone galaxy" id="galaxy">
+        <div class="screen">
+          <div class="punch"></div>
+          <div class="statusbar"><span class="now-hm">03:12</span><span>LTE ▮▮▮</span></div>
+          <div class="app">
+            <div class="p-header">
+              <div class="p-age" id="p-age">D+250 (8개월 10일)</div>
+              <div class="p-last"><b id="p-last">0:48</b><span>마지막 수유 후</span></div>
+              <div class="p-metrics">
+                <div><small>분유</small><b id="m-ml">0ml</b></div>
+                <div><small>수면</small><b id="m-sleep">0분</b></div>
+                <div><small>기저귀</small><b id="m-diaper">0회</b></div>
+              </div>
+            </div>
+            <div class="p-banner" id="p-banner" hidden><span>수면 진행 중 · <span id="p-banner-period">밤잠</span></span><b id="p-banner-time">0:00</b></div>
+            <div class="arc" id="arc"></div>
+            <div class="tabs"><span class="on">기록</span><span>타임라인</span><span>패턴</span><span>설정</span></div>
+            <div class="homebar"><i></i></div>
+          </div>
+          <div class="undo" id="undo" role="status">
+            <span class="t" id="undo-text"></span>
+            <button type="button" id="undo-edit">수정</button>
+            <button type="button" class="strong" id="undo-cancel">취소</button>
+          </div>
+          <div class="scrim"></div>
+          <div class="sheet" aria-live="polite">
+            <div class="grab"></div>
+            <h3>말로 기록</h3>
+            <div class="bigmic"><svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg></div>
+            <div class="heard" id="g-heard"></div>
+            <div class="msg" id="g-msg"></div>
+          </div>
+        </div>
+      </div>
+      <div class="device-label"><strong>Galaxy · 앱 마이크</strong><span>🎤 버튼 또는 아이콘 길게 누르기 → 말로 기록</span></div>
+    </div>
+
+    <aside class="timeline" aria-labelledby="tl-title">
+      <div class="tl-head">
+        <h2 id="tl-title">오늘 타임라인</h2>
+        <span class="sum" id="tl-sum"></span>
+      </div>
+      <ul class="tl-list" id="tl-list"></ul>
+      <p class="sample-note">회색 줄은 예시 기록이에요. 말로 기록한 항목에는 마이크 표시가 붙어요.</p>
+    </aside>
+  </section>
+
+  <section class="table-wrap" aria-label="지원 문장">
+    <table>
+      <thead><tr><th>말하기</th><th>저장되는 기록</th><th>iPhone 시리</th><th>숫자 범위</th></tr></thead>
+      <tbody>
+        <tr><td>튼튼이 분유 230ml 먹었어</td><td><span class="sw" style="background:var(--formula)"></span>분유 230ml (용량 없이 말하면 설정 기본값)</td><td>바로 저장</td><td class="mono">시리 60–260ml(10 단위) · 앱 10–400ml</td></tr>
+        <tr><td>튼튼이 모유 10분 먹었어</td><td><span class="sw" style="background:var(--breast)"></span>지금 끝난 10분 수유 구간</td><td>바로 저장</td><td class="mono">시리 1–60분 · 앱 1–180분, “1시간 20분”</td></tr>
+        <tr><td>튼튼이 이유식 150ml 먹었어</td><td><span class="sw" style="background:var(--solid)"></span>이유식 150ml</td><td>바로 저장</td><td class="mono">시리 10–300ml · 앱 10–500ml</td></tr>
+        <tr><td>튼튼이 소변 갈았어 / 대변 갈았어</td><td><span class="sw" style="background:var(--pee)"></span>기저귀 소변 / <span class="sw" style="background:var(--poop)"></span>대변(묽기 보통)</td><td>바로 저장</td><td class="mono">응가·쉬야도 인식</td></tr>
+        <tr><td>튼튼이 잠들었어 → 깼어</td><td><span class="sw" style="background:var(--sleep)"></span>수면 시작 → 같은 기록 종료 (20시 이후 밤잠)</td><td>바로 저장</td><td class="mono">이미 자는 중이면 중복 안 함</td></tr>
+        <tr><td>튼튼이 목욕했어</td><td><span class="sw" style="background:var(--bath)"></span>목욕 (새 항목)</td><td>바로 저장</td><td class="mono">—</td></tr>
+        <tr><td>튼튼이 체온 38도야</td><td><span class="sw" style="background:var(--temperature)"></span>체온 38℃ (새 항목)</td><td>바로 저장</td><td class="mono">시리 35.0–41.0 · 앱 34–43, “38도 5부”</td></tr>
+        <tr><td>튼튼이 약 먹었어</td><td><span class="sw" style="background:var(--medicine)"></span>투약 (새 항목, “해열제” 등 이름은 앱에서)</td><td>바로 저장</td><td class="mono">—</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="notes">
+    <div class="note-card">
+      <h2>iPhone</h2>
+      <ul>
+        <li>앱 이름이 <code>튼튼이</code>라서 “튼튼이 …” 문장이 곧 시리 명령이에요. 단축어 앱에서 따로 만들 필요 없이 설치하면 등록돼요.</li>
+        <li>시리는 앱을 열지 않고 공유 DB에 바로 쓰고, 앱을 다시 열면 타임라인에 나타나요.</li>
+        <li>시리 문장 속 숫자는 미리 정한 값만 알아들어요(표의 범위). 범위 밖이면 시리가 다시 물어봐요.</li>
+      </ul>
+    </div>
+    <div class="note-card">
+      <h2>Galaxy</h2>
+      <ul>
+        <li>기록 화면 🎤 버튼 → 말하면 확인 없이 저장, 5초 동안 되돌리기 토스트가 떠요.</li>
+        <li>앱 아이콘 길게 누르기 → “말로 기록”. 홈 화면에 끌어다 두면 한 번에 듣기 상태로 열려요.</li>
+        <li>빅스비·구글 어시스턴트로 앱 밖에서 바로 저장하는 건 이번 범위에서 뺐어요.</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<script src="voice-parser.js"></script>
+<script>
+(() => {
+  const P = window.VoiceParser;
+  const EXAMPLES = [
+    '튼튼이 분유 230ml 먹었어', '튼튼이 모유 10분 먹었어', '튼튼이 이유식 150ml 먹었어',
+    '튼튼이 소변 갈았어', '튼튼이 대변갈았어', '튼튼이 잠들었어', '튼튼이 깼어',
+    '튼튼이 목욕했어', '튼튼이 체온 38도야', '튼튼이 약먹었어',
+  ];
+  const ICON = {
+    formula: 'M3 2l2.01 18.23C5.13 21.23 5.97 22 7 22h10c1.03 0 1.87-.77 1.99-1.77L21 2H3zm9 17c-1.66 0-3-1.34-3-3 0-2 3-5.4 3-5.4s3 3.4 3 5.4c0 1.66-1.34 3-3 3zm6.33-11H5.67l-.44-4h13.53l-.43 4z',
+    breast: 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z',
+    sleep: 'M12.34 2.02C6.59 1.82 2 6.42 2 12c0 5.52 4.48 10 10 10 3.71 0 6.93-2.02 8.66-5.02-7.51-.25-12.09-8.43-8.32-14.96z',
+    solid: 'M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z',
+    diaper: 'M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z',
+    mic: 'M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z',
+    check: 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z',
+  };
+  const LABEL = { formula: '분유', breast: '모유', sleep: '수면', solid: '이유식', diaper: '기저귀', bath: '목욕', temperature: '체온', medicine: '투약' };
+  const DIAPER = { pee: '소변', poop: '대변', both: '소변+대변' };
+  const colorOf = (a) => a.type === 'diaper' ? (a.sub === 'pee' ? 'var(--pee)' : 'var(--poop)') : `var(--${a.type})`;
+  const pad = (n) => String(n).padStart(2, '0');
+  const hm = (d) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const durMin = (ms) => { const m = Math.max(0, Math.round(ms / 60000)); return m >= 60 ? `${Math.floor(m / 60)}:${pad(m % 60)}` : `${m}분`; };
+  const $ = (id) => document.getElementById(id);
+
+  // ── 상태: 예시 기록 몇 건으로 시작 ──
+  const now = new Date();
+  const at = (h, m) => { const d = new Date(now); d.setHours(h, m, 0, 0); if (d > now) d.setDate(d.getDate() - 1); return d; };
+  let seq = 0;
+  const records = [
+    { id: ++seq, type: 'diaper', sub: 'pee', start: at(0, 40), sample: true },
+    { id: ++seq, type: 'formula', ml: 200, start: at(1, 5), sample: true },
+    { id: ++seq, type: 'sleep', period: 'night', start: at(1, 30), end: at(2, 55), sample: true },
+  ];
+  const running = () => records.find((r) => r.type === 'sleep' && !r.end);
+
+  function summary(a) {
+    switch (a.type) {
+      case 'formula': return a.ml ? `${a.ml}ml` : '';
+      case 'breast': return a.end ? durMin(a.end - a.start) : '진행 중';
+      case 'sleep': return a.end ? `${a.period === 'night' ? '밤잠' : '낮잠'} · ${durMin(a.end - a.start)}` : (a.period === 'night' ? '밤잠' : '낮잠');
+      case 'solid': return a.ml ? `${a.ml}ml` : '';
+      case 'diaper': return DIAPER[a.sub] || '';
+      case 'temperature': return `${P.formatCelsius(a.celsius)}℃`;
+      case 'medicine': return a.medicine || '';
+      default: return '';
+    }
+  }
+
+  // VoiceRecorder.execute 와 같은 규칙
+  function execute(c) {
+    const t = new Date();
+    const add = (r) => { const rec = { id: ++seq, start: t, voice: true, ...r }; records.push(rec); return rec; };
+    switch (c.kind) {
+      case 'formula': { const ml = c.ml ?? 150; return { rec: add({ type: 'formula', ml }), msg: `분유 ${ml}ml 기록했어요` }; }
+      case 'breast': return { rec: add({ type: 'breast', start: new Date(t - c.minutes * 60000), end: t }), msg: P.confirmation(c) };
+      case 'solid': return { rec: add({ type: 'solid', ml: c.ml }), msg: P.confirmation(c) };
+      case 'diaper': { const sub = c.diaper || 'pee'; return { rec: add({ type: 'diaper', sub }), msg: `${DIAPER[sub]} 기록했어요` }; }
+      case 'sleepStart': {
+        const r = running();
+        if (r) return { error: `이미 ${hm(r.start)}부터 자고 있어요` };
+        const period = t.getHours() >= 20 ? 'night' : 'nap';
+        return { rec: add({ type: 'sleep', period }), msg: `${period === 'night' ? '밤잠' : '낮잠'} 시작을 기록했어요` };
+      }
+      case 'sleepEnd': {
+        const r = running();
+        if (!r) return { error: '진행 중인 수면이 없어요. 먼저 "잠들었어"라고 말해 주세요' };
+        r.end = t;
+        if (r.end - r.start < 60000) r.start = new Date(t - 42 * 60000); // 목업: 바로 깨우면 42분 잔 것으로
+        return { rec: r, msg: `수면 종료 · ${durMin(r.end - r.start)} 잤어요` };
+      }
+      case 'bath': return { rec: add({ type: 'bath' }), msg: P.confirmation(c) };
+      case 'temperature': return { rec: add({ type: 'temperature', celsius: c.celsius }), msg: P.confirmation(c) };
+      case 'medicine': return { rec: add({ type: 'medicine', medicine: c.medicine }), msg: P.confirmation(c) };
+    }
+  }
+
+  // ── 엄지 궤적 (constants.dart ThumbArc, 화면 폭 272 기준 0.7배) ──
+  const ARC = [
+    { key: 'formula', label: '분유' }, { key: 'sleep', label: '수면' }, { key: 'diaper', label: '기저귀' },
+    { key: 'solid', label: '이유식' }, { key: 'breast', label: '모유' }, { key: 'mic', label: '말로 기록' },
+  ];
+  function buildArc() {
+    const arc = $('arc');
+    const w = arc.clientWidth || 272, h = arc.clientHeight || 300;
+    const s = w / 390;
+    const px = w - 48 * s, py = h - 70;
+    const radii = [128 * s, 216 * s];
+    const angles = [100, 141, 181];
+    const pt = (r, deg) => [px + r * Math.cos(deg * Math.PI / 180), py - r * Math.sin(deg * Math.PI / 180)];
+    let guide = `<svg class="guide" viewBox="0 0 ${w} ${h}" aria-hidden="true">`;
+    radii.forEach((r) => {
+      const [x1, y1] = pt(r, 100), [x2, y2] = pt(r, 181);
+      guide += `<path d="M${x1} ${y1} A${r} ${r} 0 0 0 ${x2} ${y2}" fill="none" stroke="var(--p-soft)" stroke-dasharray="2 5"/>`;
+    });
+    guide += `<circle cx="${px}" cy="${py}" r="2.5" fill="var(--p-soft)"/></svg>`;
+    arc.innerHTML = guide + ARC.map((b, i) => {
+      const [x, y] = pt(radii[i < 3 ? 0 : 1], angles[i % 3]);
+      const isMic = b.key === 'mic';
+      const tag = isMic ? 'button type="button" aria-label="말로 기록"' : 'div';
+      const cls = isMic ? 'qb p-mic' : 'qb';
+      return `<${tag} class="${cls}" data-k="${b.key}" style="left:${x}px;top:${y}px;--k:var(--${b.key === 'diaper' ? 'pee' : b.key})">
+        <span class="c"><svg viewBox="0 0 24 24"><path d="${ICON[b.key]}"/></svg></span>
+        <span class="l">${b.label}</span><span class="v"></span></${isMic ? 'button' : 'div'}>`;
+    }).join('');
+    arc.querySelector('.p-mic').addEventListener('click', () => {
+      const next = EXAMPLES[micIdx++ % EXAMPLES.length];
+      run(next);
+    });
+    renderPhone();
+  }
+  let micIdx = 0;
+
+  function renderPhone() {
+    const today = records;
+    const lastFeed = [...records].filter((r) => ['formula', 'breast'].includes(r.type)).sort((a, b) => (b.end || b.start) - (a.end || a.start))[0];
+    $('p-last').textContent = lastFeed ? durMin(Date.now() - (lastFeed.end || lastFeed.start)) : '—';
+    $('m-ml').textContent = `${today.filter((r) => r.type === 'formula').reduce((s, r) => s + (r.ml || 0), 0)}ml`;
+    $('m-sleep').textContent = durMin(today.filter((r) => r.type === 'sleep').reduce((s, r) => s + ((r.end || new Date()) - r.start), 0));
+    $('m-diaper').textContent = `${today.filter((r) => r.type === 'diaper').length}회`;
+    const r = running();
+    $('p-banner').hidden = !r;
+    if (r) { $('p-banner-period').textContent = r.period === 'night' ? '밤잠' : '낮잠'; $('p-banner-time').textContent = durMin(Date.now() - r.start); }
+    document.querySelectorAll('.qb[data-k="sleep"]').forEach((el) => el.classList.toggle('running', !!r));
+    const lastF = [...records].reverse().find((x) => x.type === 'formula');
+    const v = document.querySelector('.qb[data-k="formula"] .v'); if (v) v.textContent = `${lastF ? lastF.ml : 150}ml`;
+    const dv = document.querySelector('.qb[data-k="diaper"] .v'); if (dv) dv.textContent = '소변';
+  }
+
+  function renderTimeline(freshId) {
+    const list = [...records].sort((a, b) => {
+      const ar = a.type === 'sleep' && !a.end, br = b.type === 'sleep' && !b.end;
+      if (ar !== br) return ar ? -1 : 1;
+      return b.start - a.start;
+    });
+    const mic = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${ICON.mic}"/></svg>`;
+    $('tl-list').innerHTML = list.map((a) => `
+      <li class="${a.id === freshId ? 'fresh' : ''}" style="${a.sample ? 'opacity:.62' : ''}">
+        <span class="tl-time">${hm(a.start)}</span>
+        <span class="tl-bar" style="background:${colorOf(a)}"></span>
+        <span class="tl-main"><b>${LABEL[a.type]}</b>${summary(a) ? `<span>${summary(a)}</span>` : ''}${a.type === 'sleep' && !a.end ? '<span class="badge">진행 중</span>' : ''}</span>
+        <span class="tl-via">${a.voice ? mic + '말로' : '나'}</span>
+      </li>`).join('') || '<li class="tl-empty">아직 기록이 없어요</li>';
+    const ml = records.filter((r) => r.type === 'formula').reduce((s, r) => s + (r.ml || 0), 0);
+    const sl = records.filter((r) => r.type === 'sleep').reduce((s, r) => s + ((r.end || new Date()) - r.start), 0);
+    $('tl-sum').textContent = `${ml}ml · ${durMin(sl)} · 기저귀 ${records.filter((r) => r.type === 'diaper').length}`;
+  }
+
+  // ── 연출 ──
+  const wait = (ms) => new Promise((r) => setTimeout(r, reduce ? Math.min(ms, 60) : ms));
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  async function typeInto(el, text) {
+    el.textContent = '';
+    for (const ch of text) { el.textContent += ch; await wait(38); }
+  }
+
+  let busy = false, undoTimer = null, lastSaved = null;
+  async function run(text) {
+    if (busy || !text.trim()) return;
+    busy = true;
+    document.querySelectorAll('.chip').forEach((c) => (c.disabled = true));
+    const parsed = P.parseVoiceCommand(text, { babyName: '튼튼이' });
+    const result = parsed.command ? execute(parsed.command) : { error: parsed.error };
+    await Promise.all([playSiri(text, result), playGalaxy(text, result)]);
+    if (result.rec) { renderTimeline(result.rec.id); renderPhone(); showUndo(result.rec); }
+    busy = false;
+    document.querySelectorAll('.chip').forEach((c) => (c.disabled = false));
+  }
+
+  async function playSiri(text, result) {
+    const ph = $('iphone');
+    const heard = $('siri-heard'), reply = $('siri-reply');
+    reply.hidden = true;
+    ph.classList.add('siri-on');
+    await typeInto(heard, text);
+    await wait(350);
+    $('siri-text').textContent = result.error || result.msg;
+    reply.hidden = false;
+    await wait(2100);
+    ph.classList.remove('siri-on');
+    await wait(250);
+  }
+
+  async function playGalaxy(text, result) {
+    const ph = $('galaxy');
+    const heard = $('g-heard'), msg = $('g-msg');
+    heard.textContent = ''; msg.textContent = '듣고 있어요…'; msg.className = 'msg';
+    ph.classList.add('voice-open', 'listening');
+    await wait(450);
+    await typeInto(heard, `“${text}”`);
+    ph.classList.remove('listening');
+    await wait(300);
+    msg.textContent = result.error || result.msg;
+    msg.className = 'msg ' + (result.error ? 'bad' : 'ok');
+    const bm = ph.querySelector('.bigmic path');
+    if (!result.error) bm.setAttribute('d', ICON.check);
+    await wait(result.error ? 2200 : 1100);
+    ph.classList.remove('voice-open');
+    bm.setAttribute('d', ICON.mic);
+    if (result.rec) {
+      const btn = ph.querySelector(`.qb[data-k="${result.rec.type}"]`);
+      if (btn) {
+        btn.style.setProperty('--k', colorOf(result.rec));
+        btn.classList.add('saved');
+        const icon = btn.querySelector('path'), orig = icon.getAttribute('d');
+        icon.setAttribute('d', ICON.check);
+        setTimeout(() => { btn.classList.remove('saved'); icon.setAttribute('d', orig); }, 1500);
+      }
+    }
+  }
+
+  function showUndo(rec) {
+    lastSaved = rec;
+    const s = summary(rec);
+    $('undo-text').textContent = `${hm(rec.end && rec.type === 'sleep' ? rec.end : rec.start)} ${LABEL[rec.type]}${s ? ' ' + s : ''}`;
+    $('undo').classList.add('show');
+    clearTimeout(undoTimer);
+    undoTimer = setTimeout(() => $('undo').classList.remove('show'), 5000);
+  }
+  $('undo-cancel').addEventListener('click', () => {
+    if (!lastSaved) return;
+    // 앱과 같이: 되돌리기는 해당 기록을 지운다(soft delete).
+    const i = records.indexOf(lastSaved);
+    if (i >= 0) records.splice(i, 1);
+    lastSaved = null;
+    $('undo').classList.remove('show');
+    renderTimeline(); renderPhone();
+  });
+  $('undo-edit').addEventListener('click', () => $('undo').classList.remove('show'));
+
+  // ── 명령 칩 ──
+  $('chips').innerHTML = EXAMPLES.map((t, i) => `<button type="button" class="chip" data-t="${t}"><span class="n">${i + 1}</span>${t.replace('튼튼이 ', '')}</button>`).join('');
+  $('chips').addEventListener('click', (e) => { const b = e.target.closest('.chip'); if (b) run(b.dataset.t); });
+  $('say-form').addEventListener('submit', (e) => { e.preventDefault(); const v = $('say-input').value; run(v); });
+
+  // ── 시계 ──
+  function tick() {
+    const d = new Date();
+    document.querySelectorAll('.now-hm').forEach((el) => (el.textContent = hm(d)));
+    $('lock-date').textContent = `${d.getMonth() + 1}월 ${d.getDate()}일 ${'일월화수목금토'[d.getDay()]}요일`;
+    renderPhone();
+  }
+
+  buildArc();
+  renderTimeline();
+  tick();
+  setInterval(tick, 15000);
+  addEventListener('resize', () => { clearTimeout(window.__rz); window.__rz = setTimeout(buildArc, 150); });
+})();
+</script>

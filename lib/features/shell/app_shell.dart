@@ -9,6 +9,8 @@ import '../pattern/pattern_screen.dart';
 import '../record/record_screen.dart';
 import '../settings/settings_screen.dart';
 import '../timeline/timeline_screen.dart';
+import '../voice/voice_launch.dart';
+import '../voice/voice_recorder.dart';
 
 class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key});
@@ -32,6 +34,17 @@ class _AppShellState extends ConsumerState<AppShell>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    VoiceLaunch.onListen(_openVoiceFromLaunch);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (await VoiceLaunch.consumePendingListen()) _openVoiceFromLaunch();
+    });
+  }
+
+  /// "말로 기록" 바로가기로 열렸으면 기록 탭으로 옮기고 음성 시트를 띄운다.
+  void _openVoiceFromLaunch() {
+    if (!mounted) return;
+    setState(() => _index = 0);
+    ref.read(voiceLaunchTickProvider.notifier).state++;
   }
 
   @override

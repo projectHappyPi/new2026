@@ -206,10 +206,13 @@ class _TimelineRow extends ConsumerWidget {
                         ),
                         if (activity.summary.isNotEmpty) ...[
                           const SizedBox(width: 6),
-                          Text(
-                            activity.summary,
-                            style: AppTypography.body.copyWith(
-                              color: colors.onSurfaceVariant,
+                          Flexible(
+                            child: Text(
+                              activity.summary,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.body.copyWith(
+                                color: colors.onSurfaceVariant,
+                              ),
                             ),
                           ),
                         ],
@@ -226,6 +229,15 @@ class _TimelineRow extends ConsumerWidget {
                   ],
                 ),
               ),
+              if (activity.viaVoice)
+                Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: Icon(
+                    Icons.mic_none_rounded,
+                    size: 14,
+                    color: colors.muted,
+                  ),
+                ),
               Text(
                 activity.createdBy == 'me' ? '나' : activity.createdBy,
                 style: AppTypography.monoSmall.copyWith(color: colors.muted),

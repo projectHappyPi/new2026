@@ -12,6 +12,9 @@ class ActivityColors extends ThemeExtension<ActivityColors> {
   final Color pee;
   final Color poop;
   final Color breast;
+  final Color bath;
+  final Color temperature;
+  final Color medicine;
 
   const ActivityColors({
     required this.formula,
@@ -20,6 +23,9 @@ class ActivityColors extends ThemeExtension<ActivityColors> {
     required this.pee,
     required this.poop,
     required this.breast,
+    required this.bath,
+    required this.temperature,
+    required this.medicine,
   });
 
   static const dark = ActivityColors(
@@ -29,6 +35,9 @@ class ActivityColors extends ThemeExtension<ActivityColors> {
     pee: Color(0xFF6FA79E),
     poop: Color(0xFFA8794F),
     breast: Color(0xFFD4909B),
+    bath: Color(0xFF6FA0C9),
+    temperature: Color(0xFFD9826A),
+    medicine: Color(0xFFB08FCB),
   );
 
   static const light = ActivityColors(
@@ -38,6 +47,9 @@ class ActivityColors extends ThemeExtension<ActivityColors> {
     pee: Color(0xFF367A70),
     poop: Color(0xFF845328),
     breast: Color(0xFFAC5C6C),
+    bath: Color(0xFF356E99),
+    temperature: Color(0xFFB0503A),
+    medicine: Color(0xFF7A5A9C),
   );
 
   Color forType(ActivityType type, {DiaperSub? diaperSub}) {
@@ -52,6 +64,12 @@ class ActivityColors extends ThemeExtension<ActivityColors> {
         return breast;
       case ActivityType.diaper:
         return (diaperSub?.hasPoop ?? false) ? poop : pee;
+      case ActivityType.bath:
+        return bath;
+      case ActivityType.temperature:
+        return temperature;
+      case ActivityType.medicine:
+        return medicine;
     }
   }
 
@@ -65,6 +83,9 @@ class ActivityColors extends ThemeExtension<ActivityColors> {
     Color? pee,
     Color? poop,
     Color? breast,
+    Color? bath,
+    Color? temperature,
+    Color? medicine,
   }) {
     return ActivityColors(
       formula: formula ?? this.formula,
@@ -73,6 +94,9 @@ class ActivityColors extends ThemeExtension<ActivityColors> {
       pee: pee ?? this.pee,
       poop: poop ?? this.poop,
       breast: breast ?? this.breast,
+      bath: bath ?? this.bath,
+      temperature: temperature ?? this.temperature,
+      medicine: medicine ?? this.medicine,
     );
   }
 
@@ -86,6 +110,9 @@ class ActivityColors extends ThemeExtension<ActivityColors> {
       pee: Color.lerp(pee, other.pee, t)!,
       poop: Color.lerp(poop, other.poop, t)!,
       breast: Color.lerp(breast, other.breast, t)!,
+      bath: Color.lerp(bath, other.bath, t)!,
+      temperature: Color.lerp(temperature, other.temperature, t)!,
+      medicine: Color.lerp(medicine, other.medicine, t)!,
     );
   }
 }

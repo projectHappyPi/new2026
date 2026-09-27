@@ -1,5 +1,17 @@
-/// 활동 유형. 값 순서는 DB에 textEnum으로 저장되므로 임의로 바꾸지 않는다.
-enum ActivityType { formula, breast, sleep, solid, diaper }
+/// 활동 유형. DB에는 textEnum(.name 문자열)으로 저장되므로 이름을 바꾸지 않는다.
+/// 새 유형은 뒤에만 추가한다(iOS SharedActivityStore.swift도 같은 문자열을 쓴다).
+/// bath·temperature·medicine은 홈 버튼 없이 "말로 기록"으로만 추가하고,
+/// 타임라인에서 눌러 수정한다.
+enum ActivityType {
+  formula,
+  breast,
+  sleep,
+  solid,
+  diaper,
+  bath,
+  temperature,
+  medicine,
+}
 
 /// instant: 즉시 기록, range: 시작~종료 구간 기록.
 enum ActivityKind { instant, range }
@@ -11,13 +23,19 @@ extension ActivityTypeX on ActivityType {
     ActivityType.sleep => '수면',
     ActivityType.solid => '이유식',
     ActivityType.diaper => '기저귀',
+    ActivityType.bath => '목욕',
+    ActivityType.temperature => '체온',
+    ActivityType.medicine => '투약',
   };
 
   ActivityKind get kind => switch (this) {
     ActivityType.breast || ActivityType.sleep => ActivityKind.range,
     ActivityType.formula ||
     ActivityType.solid ||
-    ActivityType.diaper => ActivityKind.instant,
+    ActivityType.diaper ||
+    ActivityType.bath ||
+    ActivityType.temperature ||
+    ActivityType.medicine => ActivityKind.instant,
   };
 
   bool get isRange => kind == ActivityKind.range;

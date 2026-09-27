@@ -12,7 +12,7 @@ class GridLayout extends StatelessWidget {
   final Map<ActivityType, String> valuePreviews;
   final void Function(ActivityType type) onShortTap;
   final void Function(ActivityType type) onLongPress;
-  final VoidCallback onEditButtons;
+  final VoidCallback onVoice;
 
   const GridLayout({
     super.key,
@@ -21,7 +21,7 @@ class GridLayout extends StatelessWidget {
     required this.valuePreviews,
     required this.onShortTap,
     required this.onLongPress,
-    required this.onEditButtons,
+    required this.onVoice,
   });
 
   @override
@@ -54,7 +54,7 @@ class GridLayout extends StatelessWidget {
                 },
               ),
             ),
-          Center(child: EditButtonsButton(onTap: onEditButtons)),
+          Center(child: VoiceButton(onTap: onVoice)),
         ],
       ),
     );

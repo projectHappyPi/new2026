@@ -177,6 +177,9 @@ class ActivityActions {
         return {'food': food, 'amount': '대부분'};
       case ActivityType.breast:
       case ActivityType.sleep:
+      case ActivityType.bath:
+      case ActivityType.temperature:
+      case ActivityType.medicine:
         return {};
     }
   }

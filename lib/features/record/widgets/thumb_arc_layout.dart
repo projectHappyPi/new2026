@@ -34,7 +34,7 @@ Offset seatPosition(Size screen, int index, bool isRightHand) {
 }
 
 /// 홈 화면의 정체성. 엄지 회전 궤적을 실제로 계산해 6개 버튼(분유·수면·기저귀·
-/// 이유식·모유·버튼 구성 편집)을 배치한다. 궤적 가이드선은 장식이 아니라 배치
+/// 이유식·모유·말로 기록)을 배치한다. 궤적 가이드선은 장식이 아니라 배치
 /// 논리를 보여주는 요소이므로 뺴지 않는다.
 class ThumbArcLayout extends StatelessWidget {
   final bool isRightHand;
@@ -44,7 +44,7 @@ class ThumbArcLayout extends StatelessWidget {
   final bool nightModeActive;
   final void Function(ActivityType type) onShortTap;
   final void Function(ActivityType type) onLongPress;
-  final VoidCallback onEditButtons;
+  final VoidCallback onVoice;
 
   const ThumbArcLayout({
     super.key,
@@ -54,7 +54,7 @@ class ThumbArcLayout extends StatelessWidget {
     required this.valuePreviews,
     required this.onShortTap,
     required this.onLongPress,
-    required this.onEditButtons,
+    required this.onVoice,
     this.nightModeActive = false,
   });
 
@@ -95,12 +95,15 @@ class ThumbArcLayout extends StatelessWidget {
           );
         }
 
-        final editPos = seatPosition(size, 5, isRightHand);
+        final voicePos = seatPosition(size, 5, isRightHand);
         buttons.add(
           Positioned(
-            left: editPos.dx - ThumbArc.buttonSize / 2,
-            top: editPos.dy - ThumbArc.buttonSize / 2,
-            child: EditButtonsButton(onTap: onEditButtons),
+            left: voicePos.dx - ThumbArc.buttonSize / 2,
+            top: voicePos.dy - ThumbArc.buttonSize / 2,
+            child: VoiceButton(
+              onTap: onVoice,
+              nightModeActive: nightModeActive,
+            ),
           ),
         );
 

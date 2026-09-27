@@ -12,6 +12,9 @@ IconData iconForType(ActivityType type) => switch (type) {
   ActivityType.sleep => Icons.bedtime_rounded,
   ActivityType.solid => Icons.restaurant_rounded,
   ActivityType.diaper => Icons.child_care_rounded,
+  ActivityType.bath => Icons.bathtub_rounded,
+  ActivityType.temperature => Icons.thermostat_rounded,
+  ActivityType.medicine => Icons.medication_rounded,
 };
 
 /// 엄지 궤적/그리드 공통으로 쓰는 원형 버튼.
@@ -114,32 +117,56 @@ class QuickButton extends StatelessWidget {
   }
 }
 
-/// index 5: 버튼 구성 편집. 가장 손이 안 닿는 자리에 둔다.
-class EditButtonsButton extends StatelessWidget {
+/// 엄지 궤적 6번째 자리(기존 "버튼 구성 편집" 자리)의 말로 기록 버튼.
+class VoiceButton extends StatelessWidget {
   final VoidCallback onTap;
   final double size;
+  final bool nightModeActive;
 
-  const EditButtonsButton({super.key, required this.onTap, this.size = 64});
+  const VoiceButton({
+    super.key,
+    required this.onTap,
+    this.size = 64,
+    this.nightModeActive = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: colors.surfaceVariant,
-          border: Border.all(color: colors.outline),
-        ),
-        alignment: Alignment.center,
-        child: Icon(
-          Icons.add_rounded,
-          color: colors.onSurfaceVariant,
-          size: 22,
+    final effectiveSize = nightModeActive ? size * 1.2 : size;
+    return Semantics(
+      button: true,
+      label: '말로 기록',
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: effectiveSize,
+              height: effectiveSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: colors.onSurface.withValues(alpha: 0.08),
+                border: Border.all(color: colors.onSurface, width: 1.5),
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                Icons.mic_rounded,
+                color: colors.onSurface,
+                size: effectiveSize * 0.4,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '말로 기록',
+              style: AppTypography.label.copyWith(
+                color: colors.onSurfaceVariant,
+                letterSpacing: 0,
+              ),
+            ),
+          ],
         ),
       ),
     );

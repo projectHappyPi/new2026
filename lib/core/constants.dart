@@ -48,6 +48,23 @@ class SolidDefaults {
   static const int recentFoodCount = 5;
 }
 
+/// 체온 시트: 프리셋 칩 + 슬라이더 범위(섭씨).
+class TemperaturePresets {
+  const TemperaturePresets._();
+
+  static const List<double> presets = [36.5, 37.5, 38.0, 38.5, 39.0];
+  static const double min = 34.0;
+  static const double max = 42.0;
+  static const double defaultCelsius = 36.5;
+}
+
+/// 투약 시트: 자주 쓰는 약 이름 칩.
+class MedicinePresets {
+  const MedicinePresets._();
+
+  static const List<String> names = ['해열제', '유산균', '비타민D', '감기약'];
+}
+
 /// 수면·모유 시트: 시작 시각 칩(분 단위 과거 오프셋).
 class StartOffsets {
   const StartOffsets._();

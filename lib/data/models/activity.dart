@@ -41,6 +41,15 @@ class Activity {
   String? get side => payload['side'] as String?;
   String? get note => payload['note'] as String?;
 
+  /// 체온(섭씨). JSON에서 38처럼 정수로 올 수도 있어 num으로 받는다.
+  double? get celsius => (payload['celsius'] as num?)?.toDouble();
+
+  /// 약 이름(해열제 등). 이름 없이 "약 먹었어"면 null.
+  String? get medicine => payload['medicine'] as String?;
+
+  /// 말로 기록한 항목인지(타임라인 표시용).
+  bool get viaVoice => payload['via'] == 'voice';
+
   DiaperSub? get diaperSub {
     final s = payload['sub'] as String?;
     for (final e in DiaperSub.values) {
@@ -67,9 +76,20 @@ class Activity {
           : (sleepPeriod != null
                 ? '${sleepPeriod!.label} · ${dur(elapsed())}'
                 : dur(elapsed())),
-    ActivityType.solid => food ?? '',
+    ActivityType.solid => [
+      if (food != null) food!,
+      if (ml != null) '${ml}ml',
+    ].join(' '),
     ActivityType.diaper => diaperSub?.label ?? '',
+    ActivityType.bath => '',
+    ActivityType.temperature => celsius != null ? '${_c(celsius!)}℃' : '',
+    ActivityType.medicine => medicine ?? '',
   };
+
+  static String _c(double v) {
+    final r = (v * 10).round() / 10;
+    return r == r.truncateToDouble() ? '${r.toInt()}' : r.toStringAsFixed(1);
+  }
 
   Activity copyWith({
     String? id,

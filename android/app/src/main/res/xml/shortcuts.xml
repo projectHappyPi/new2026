@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 앱 아이콘을 길게 누르면 나오는 정적 바로가기. 홈 화면에 끌어다 놓으면
+     한 번 탭으로 곧바로 "말로 기록" 듣기 상태로 들어간다. -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="voice_log"
+        android:enabled="true"
+        android:icon="@drawable/ic_shortcut_mic"
+        android:shortcutShortLabel="@string/shortcut_voice_short"
+        android:shortcutLongLabel="@string/shortcut_voice_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="tunteuni://voice"
+            android:targetPackage="com.happypi.parenting_log"
+            android:targetClass="com.happypi.parenting_log.MainActivity"/>
+    </shortcut>
+</shortcuts>

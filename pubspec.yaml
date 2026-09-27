@@ -19,6 +19,8 @@ dependencies:
   shared_preferences: ^2.2.0
   uuid: ^4.3.0
   intl: ^0.19.0
+  # 말로 기록: Android SpeechRecognizer / iOS SFSpeechRecognizer 래퍼
+  speech_to_text: ^7.0.0
   image_picker: ^1.1.2
 
 dev_dependencies:
