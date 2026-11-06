@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>튼튼이 앱 목업</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  /* 페이지(바깥) 토큰 — 앱의 라이트 팔레트를 바탕으로 */
+  :root {
+    --bg: #EFEAE3;
+    --surface: #FFFFFF;
+    --ink: #241D18;
+    --muted: #6F645B;
+    --line: #DED5CA;
+    --accent: #4F58A3;
+    --accent-soft: #E4E5F2;
+    --sans: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #0E0B0A; --surface: #1A1513; --ink: #F1E9E0; --muted: #A0958C;
+      --line: #2C2522; --accent: #8189C9; --accent-soft: #1F2033;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0E0B0A; --surface: #1A1513; --ink: #F1E9E0; --muted: #A0958C;
+    --line: #2C2522; --accent: #8189C9; --accent-soft: #1F2033;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0; -webkit-text-size-adjust: 100%;
+    background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.55;
+    padding-inline: 20px; padding-block: 28px 56px; word-break: keep-all; overflow-wrap: anywhere;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  header.top { display: grid; gap: 8px; max-width: 74ch; }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; color: var(--accent); text-transform: uppercase; }
+  h1 { font-size: clamp(26px, 4vw, 34px); line-height: 1.2; margin: 0; font-weight: 700; letter-spacing: -0.01em; text-wrap: balance; }
+  h2 { font-size: 15px; margin: 0; font-weight: 600; text-wrap: balance; }
+  p { margin: 0; }
+  .lede { color: var(--muted); }
+
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface); }
+  .seg button { font: inherit; font-size: 13.5px; border: 0; background: none; color: var(--ink); padding: 7px 14px; cursor: pointer; }
+  .seg button + button { border-left: 1px solid var(--line); }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  :root[data-theme="dark"] .seg button[aria-pressed="true"] { color: #0E0B0A; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .seg button[aria-pressed="true"] { color: #0E0B0A; } }
+  .jump { display: flex; flex-wrap: wrap; gap: 6px; }
+  .jump button { font: inherit; font-size: 13px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; }
+  .jump button:hover { border-color: var(--accent); }
+  .tb-label { font-size: 12.5px; color: var(--muted); }
+  button:focus-visible, input:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .stage { display: grid; grid-template-columns: auto minmax(300px, 1fr); gap: 32px; align-items: start; }
+  @media (max-width: 860px) { .stage { grid-template-columns: minmax(0, 1fr); justify-items: center; } .side { width: 100%; } }
+
+  /* ───────── 폰 ───────── */
+  .phone { width: 380px; max-width: 100%; height: 800px; padding: 10px; border-radius: 52px; background: #050505;
+    box-shadow: 0 0 0 1px #2A2522, 0 24px 50px -24px rgba(20, 12, 8, .55); position: relative; }
+  .phone.galaxy { border-radius: 34px; }
+  .screen { position: relative; width: 100%; height: 100%; border-radius: 42px; overflow: hidden; font-size: 13px;
+    background: var(--a-bg); color: var(--a-on); font-family: var(--sans); }
+  .galaxy .screen { border-radius: 25px; }
+  /* 앱 토큰: lib/core/theme/app_colors.dart · activity_colors.dart */
+  .screen[data-app="dark"] {
+    --a-bg: #15110F; --a-surface: #1E1917; --a-variant: #292220; --a-outline: #38302C; --a-soft: #2A2421;
+    --a-on: #F1E9E0; --a-on-var: #B8ABA1; --a-muted: #7F736A;
+    --formula: #E5B478; --sleep: #8189C9; --solid: #9CAF6C; --pee: #6FA79E; --poop: #A8794F; --breast: #D4909B;
+    --bath: #6FA0C9; --temperature: #D9826A; --medicine: #B08FCB;
+  }
+  .screen[data-app="light"] {
+    --a-bg: #F4EFE8; --a-surface: #FFFFFF; --a-variant: #EBE3D8; --a-outline: #D8CCBD; --a-soft: #E6DDD1;
+    --a-on: #241D18; --a-on-var: #5E5349; --a-muted: #8C8075;
+    --formula: #B87A28; --sleep: #4F58A3; --solid: #617536; --pee: #367A70; --poop: #845328; --breast: #AC5C6C;
+    --bath: #356E99; --temperature: #B0503A; --medicine: #7A5A9C;
+  }
+  .island { position: absolute; top: 11px; left: 50%; transform: translateX(-50%); width: 96px; height: 28px; border-radius: 16px; background: #000; z-index: 50; }
+  .punch { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 11px; height: 11px; border-radius: 50%; background: #000; z-index: 50; }
+  .sbar { position: absolute; top: 0; left: 0; right: 0; height: 48px; display: flex; justify-content: space-between; align-items: center;
+    padding: 4px 28px 0; font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--a-on); z-index: 40; }
+  .galaxy .sbar { height: 34px; padding: 2px 18px 0; font-weight: 500; }
+  .body { position: absolute; top: 48px; left: 0; right: 0; bottom: 84px; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
+  .galaxy .body { top: 34px; bottom: 92px; }
+  .body::-webkit-scrollbar { display: none; }
+  .tabs { position: absolute; left: 0; right: 0; bottom: 0; height: 84px; background: var(--a-surface); border-top: 1px solid var(--a-soft);
+    display: grid; grid-template-columns: repeat(5, 1fr); padding-bottom: 24px; z-index: 30; }
+  .galaxy .tabs { height: 92px; padding-bottom: 36px; }
+  .tabs button { font: inherit; font-size: 10.5px; background: none; border: 0; color: var(--a-muted); display: grid; place-items: center; gap: 1px; cursor: pointer; padding-top: 6px; }
+  .tabs button svg { width: 22px; height: 22px; fill: currentColor; }
+  .tabs button[aria-current="page"] { color: var(--a-on); }
+  .homeind { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 120px; height: 5px; border-radius: 3px; background: var(--a-on); opacity: .5; z-index: 31; }
+  .gnav { position: absolute; bottom: 4px; left: 0; right: 0; height: 30px; display: flex; justify-content: space-around; align-items: center; z-index: 31; color: var(--a-on-var); }
+  .gnav i { display: block; width: 14px; height: 14px; border: 1.6px solid currentColor; opacity: .7; }
+  .gnav i:nth-child(1) { width: 4px; border-width: 0 1.6px; height: 14px; }
+  .gnav i:nth-child(2) { border-radius: 4px; }
+  .gnav i:nth-child(3) { border-width: 0 0 1.6px 1.6px; transform: rotate(45deg); width: 10px; height: 10px; }
+
+  /* 기록 화면 */
+  .rec { display: flex; flex-direction: column; height: 100%; }
+  .hdr { padding: 12px 20px 0; }
+  .hdr-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .hdr-top b { font-size: 17px; font-weight: 600; }
+  .hdr-top span { font-family: var(--mono); font-size: 12.5px; color: var(--a-on-var); font-variant-numeric: tabular-nums; }
+  .lbl { font-size: 12px; color: var(--a-on-var); letter-spacing: .02em; }
+  .big { display: flex; align-items: baseline; gap: 8px; margin-top: 2px; }
+  .big b { font-family: var(--mono); font-size: 48px; font-weight: 500; letter-spacing: -0.03em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .big span { color: var(--a-on-var); }
+  .pred { color: var(--a-muted); font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .metrics { display: grid; grid-template-columns: 1fr 1px 1fr 1px 1fr; gap: 12px; border-top: 1px solid var(--a-soft); margin-top: 12px; padding-top: 12px; }
+  .metrics i { background: var(--a-soft); }
+  .metrics b { display: block; font-family: var(--mono); font-size: 18px; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .metrics small { color: var(--a-on-var); font-size: 11.5px; }
+  .banner { margin: 12px 16px 0; border-radius: 12px; padding: 8px 6px 8px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    background: color-mix(in srgb, var(--k) 18%, transparent); border: 1px solid color-mix(in srgb, var(--k) 70%, transparent); }
+  .banner span { font-variant-numeric: tabular-nums; }
+  .banner button { font: inherit; font-weight: 600; color: var(--k); background: none; border: 0; padding: 4px 10px; cursor: pointer; }
+  .arc { position: relative; flex: 1; min-height: 300px; touch-action: manipulation; }
+  .arc svg.guide { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .qb { position: absolute; display: grid; justify-items: center; gap: 2px; transform: translate(-50%, calc(-1 * var(--s) / 2)); width: 76px;
+    background: none; border: 0; padding: 0; color: inherit; font: inherit; cursor: pointer; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  .qb .c { width: var(--s); height: var(--s); border-radius: 50%; display: grid; place-items: center; align-content: center; gap: 1px; background: var(--a-variant);
+    border: 1px solid var(--a-outline); transition: background .15s, border-color .15s, transform .1s; }
+  .qb:active .c { transform: scale(.95); }
+  .qb svg { width: calc(var(--s) * .38); height: calc(var(--s) * .38); fill: var(--k); }
+  .qb .l { font-size: 11px; line-height: 1.2; color: var(--a-on-var); white-space: nowrap; }
+  .qb .v { font-family: var(--mono); font-size: 9px; line-height: 1; color: var(--a-on-var); font-variant-numeric: tabular-nums; }
+  .qb .v:empty { display: none; }
+  .qb.running .c { background: color-mix(in srgb, var(--k) 24%, transparent); border: 1.5px solid var(--k); }
+  .qb.saved .c { background: color-mix(in srgb, var(--k) 30%, transparent); border-color: var(--k); }
+  .qb.mic .c { background: color-mix(in srgb, var(--a-on) 8%, transparent); border: 1.5px solid var(--a-on); }
+  .qb.mic svg { fill: var(--a-on); }
+  .hint { position: absolute; left: 14px; top: 8px; font-size: 10.5px; color: var(--a-muted); max-width: 46%; line-height: 1.4; }
+
+  /* 공통 화면 */
+  .pg { padding: 10px 16px 24px; display: grid; gap: 12px; align-content: start; }
+  .pg-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 36px; }
+  .pg-h h3 { margin: 0; font-size: 20px; font-weight: 600; }
+  .pg-h .back { font: inherit; background: none; border: 0; color: var(--a-on-var); cursor: pointer; padding: 4px 0; font-size: 14px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font: inherit; font-size: 12.5px; border: 1px solid var(--a-outline); background: var(--a-surface); color: var(--a-on); border-radius: 999px; padding: 5px 11px; cursor: pointer; }
+  .chip[aria-pressed="true"] { background: var(--a-on); color: var(--a-bg); border-color: var(--a-on); }
+  .muted { color: var(--a-muted); }
+  .day-h { font-size: 12px; color: var(--a-on-var); margin-top: 6px; }
+  .tl { display: grid; }
+  .tl-row { display: grid; grid-template-columns: 44px 3px 1fr auto; gap: 10px; align-items: center; padding: 9px 4px; border-bottom: 1px solid var(--a-soft);
+    background: none; border-left: 0; border-right: 0; border-top: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; width: 100%; }
+  .tl-row .t { font-family: var(--mono); font-size: 12px; color: var(--a-on-var); font-variant-numeric: tabular-nums; }
+  .tl-row .bar { width: 3px; height: 26px; border-radius: 2px; }
+  .tl-row .m { min-width: 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
+  .tl-row .m b { font-weight: 600; }
+  .tl-row .m span { color: var(--a-on-var); }
+  .badge { font-family: var(--mono); font-size: 10px; padding: 1px 6px; border-radius: 4px; background: var(--a-variant); color: var(--a-on); }
+  .who { display: inline-flex; gap: 3px; align-items: center; font-size: 10.5px; color: var(--a-on-var); background: var(--a-variant); padding: 1px 7px; border-radius: 9px; white-space: nowrap; }
+  .who svg { width: 11px; height: 11px; fill: currentColor; }
+
+  /* 달력 탭 */
+  .wd, .grow { display: grid; grid-template-columns: repeat(7, 1fr); }
+  .wd span { text-align: center; font-size: 10.5px; color: var(--a-on-var); padding-bottom: 4px; }
+  .cell { min-height: 54px; border-top: 1px solid var(--a-soft); padding: 2px 1px 0; display: grid; align-content: start; gap: 1px; min-width: 0;
+    background: none; border-left: 0; border-right: 0; border-bottom: 0; font: inherit; color: inherit; cursor: pointer; }
+  .cell.sel { background: color-mix(in srgb, var(--a-on) 7%, transparent); }
+  .cell.out { opacity: .35; }
+  .cell .d { justify-self: center; font-family: var(--mono); font-size: 10.5px; font-weight: 600; padding: 0 4px; border-radius: 8px; line-height: 1.5; }
+  .cell .d.today { background: var(--a-on); color: var(--a-bg); }
+  .ebar { font-size: 8.5px; line-height: 1.45; color: #fff; border-radius: 3px; padding: 0 2px; white-space: nowrap; overflow: hidden; text-align: left; }
+  .emore { font-size: 8px; color: var(--a-muted); text-align: center; font-family: var(--mono); }
+  .sun { color: #E0685A; } .sat { color: #5B8FD9; }
+  .ev-row { display: grid; grid-template-columns: 64px 4px 1fr auto; gap: 10px; align-items: center; padding: 8px 2px; border: 0; border-bottom: 1px solid var(--a-soft);
+    background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; width: 100%; }
+  .ev-row .t { font-family: var(--mono); font-size: 11.5px; color: var(--a-on-var); }
+  .ev-row i { height: 28px; border-radius: 2px; }
+  .fab { position: absolute; right: 16px; bottom: 100px; width: 48px; height: 48px; border-radius: 16px; background: var(--a-on); color: var(--a-bg);
+    border: 0; font-size: 26px; line-height: 1; display: grid; place-items: center; cursor: pointer; z-index: 25; box-shadow: 0 6px 16px -6px rgba(0,0,0,.5); }
+  .galaxy .fab { bottom: 108px; }
+
+  /* 패턴 */
+  .ring-wrap { display: grid; justify-items: center; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 11px; color: var(--a-on-var); justify-content: center; }
+  .legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 4px; }
+  .heat { display: grid; gap: 2px; }
+  .heat-row { display: grid; grid-template-columns: 34px 1fr; gap: 6px; align-items: center; }
+  .heat-row span { font-family: var(--mono); font-size: 9.5px; color: var(--a-muted); text-align: right; }
+  .heat-cells { display: grid; grid-template-columns: repeat(48, 1fr); gap: 1px; height: 11px; }
+  .heat-cells i { background: var(--a-soft); border-radius: 1px; }
+  .heat-cells i.on { background: var(--sleep); }
+  .heat-axis { display: grid; grid-template-columns: 34px 1fr; gap: 6px; }
+  .heat-axis div { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 9px; color: var(--a-muted); }
+
+  /* 설정 */
+  .sec { font-size: 11.5px; color: var(--a-on-var); margin-top: 8px; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 2px; border-bottom: 1px solid var(--a-soft); min-height: 46px; }
+  button.row { width: 100%; font: inherit; color: inherit; background: none; border-left: 0; border-right: 0; border-top: 0; cursor: pointer; text-align: left; }
+  .row .rv { color: var(--a-on-var); font-size: 12.5px; }
+  .aseg { display: inline-flex; border: 1px solid var(--a-outline); border-radius: 9px; overflow: hidden; flex: none; }
+  .aseg button { font: inherit; font-size: 12px; border: 0; background: none; color: var(--a-on); padding: 5px 10px; cursor: pointer; }
+  .aseg button + button { border-left: 1px solid var(--a-outline); }
+  .aseg button[aria-pressed="true"] { background: var(--a-on); color: var(--a-bg); }
+  .sw { width: 42px; height: 24px; border-radius: 12px; background: var(--a-outline); position: relative; border: 0; cursor: pointer; flex: none; }
+  .sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--a-on); transition: left .15s; }
+  .sw[aria-checked="true"] { background: var(--sleep); }
+  .sw[aria-checked="true"]::after { left: 21px; background: #fff; }
+  .step { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .step button { font: inherit; width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--a-outline); background: var(--a-surface); color: var(--a-on); cursor: pointer; }
+  .field { display: grid; gap: 4px; }
+  .field label { font-size: 11.5px; color: var(--a-on-var); }
+  .field input { font: inherit; font-size: 13.5px; padding: 9px 11px; border-radius: 10px; border: 0; background: var(--a-variant); color: var(--a-on); min-width: 0; width: 100%; }
+  .pill-btn { font: inherit; font-weight: 600; border: 0; border-radius: 12px; padding: 11px; background: var(--a-on); color: var(--a-bg); cursor: pointer; width: 100%; }
+  .ghost-btn { font: inherit; border: 1px solid var(--a-outline); border-radius: 12px; padding: 10px; background: none; color: var(--a-on); cursor: pointer; }
+  .sync-line { display: flex; align-items: center; gap: 8px; color: var(--a-on-var); font-size: 12.5px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #6FAF72; flex: none; }
+  .dot.busy { background: #D9B44A; animation: blink .8s infinite alternate; }
+  @keyframes blink { to { opacity: .3; } }
+
+  /* 위젯 블록 (두 번째 캡처 모양) */
+  .wst { display: grid; gap: 1px; }
+  .wst .h { display: flex; justify-content: space-between; gap: 6px; font-weight: 700; font-size: var(--fh, 14px); }
+  .wst .h span:last-child { opacity: .6; font-weight: 600; }
+  .wst .r { display: flex; gap: 7px; align-items: baseline; white-space: nowrap; }
+  .wst .r b { font-size: var(--fl, 15px); font-weight: 700; }
+  .wst .r .t { font-size: var(--fb, 20px); font-weight: 700; font-variant-numeric: tabular-nums; }
+  .wst .n { font-size: var(--fn, 13px); opacity: .72; padding-left: 8px; font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 500; }
+  .wst .none { opacity: .6; font-size: 12px; }
+  .wprev { border-radius: 20px; padding: 14px 16px; }
+  .wprev.dark { background: #26221F; color: #fff; }
+  .wprev.light { background: #F4F1EC; color: #1B1B1F; }
+
+  /* 토스트 · 시트 */
+  .toast { position: absolute; left: 12px; right: 12px; top: 52px; z-index: 46; background: var(--a-surface); border: 1px solid var(--a-outline);
+    border-radius: 12px; padding: 7px 6px 7px 14px; display: flex; align-items: center; gap: 4px; font-size: 12.5px;
+    transform: translateY(-8px); opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; box-shadow: 0 8px 24px -10px rgba(0,0,0,.5); }
+  .galaxy .toast { top: 40px; }
+  .toast.show { opacity: 1; transform: none; pointer-events: auto; }
+  .toast .tt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .toast button { font: inherit; font-size: 12px; background: none; border: 0; color: var(--a-on-var); padding: 5px 8px; cursor: pointer; }
+  .toast button.strong { color: var(--a-on); font-weight: 600; }
+  .scrim { position: absolute; inset: 0; background: rgba(0,0,0,.5); z-index: 44; opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .sheet { position: absolute; left: 0; right: 0; bottom: 0; max-height: 84%; overflow-y: auto; z-index: 45; background: var(--a-surface);
+    border-radius: 22px 22px 0 0; padding: 10px 20px 30px; transform: translateY(105%); transition: transform .24s ease; display: grid; gap: 12px; scrollbar-width: none; }
+  .sheet::-webkit-scrollbar { display: none; }
+  .open .scrim { opacity: 1; pointer-events: auto; }
+  .open .sheet { transform: none; }
+  .grab { width: 36px; height: 4px; border-radius: 2px; background: var(--a-outline); justify-self: center; }
+  .sheet h4 { margin: 0; font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .sheet h4 i { width: 10px; height: 10px; border-radius: 3px; }
+  .sub { font-size: 11.5px; color: var(--a-on-var); }
+  .vnum { font-family: var(--mono); font-size: 34px; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .range { width: 100%; accent-color: var(--k, var(--a-on)); }
+  .btns { display: flex; gap: 8px; justify-content: flex-end; }
+  .btns .pill-btn, .btns .ghost-btn { width: auto; padding-inline: 18px; }
+  .bigmic { width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; justify-self: center; border: 2px solid var(--a-on);
+    background: color-mix(in srgb, var(--a-on) 12%, transparent); position: relative; }
+  .bigmic svg { width: 32px; height: 32px; fill: var(--a-on); }
+  .bigmic.listen::after { content: ""; position: absolute; inset: -9px; border-radius: 50%; border: 1px solid var(--a-on); animation: pulse 1.2s ease-out infinite; }
+  @keyframes pulse { from { transform: scale(.9); opacity: .5; } to { transform: scale(1.28); opacity: 0; } }
+  .vmsg { text-align: center; min-height: 20px; }
+  .vmsg.ok { font-weight: 600; }
+  .vmsg.bad { color: var(--temperature); }
+  .dots { display: flex; flex-wrap: wrap; gap: 9px; }
+  .dots button { width: 26px; height: 26px; border-radius: 50%; border: 2.5px solid transparent; cursor: pointer; }
+  .dots button[aria-pressed="true"] { border-color: var(--a-on); }
+
+  /* ───────── 옆 패널 ───────── */
+  .side { display: grid; gap: 18px; align-content: start; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: grid; gap: 10px; }
+  .card-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .card-h span { font-size: 12px; color: var(--muted); }
+  .lock { position: relative; width: 100%; max-width: 400px; justify-self: center; border-radius: 18px; overflow: hidden; padding: 18px 18px 22px; color: #fff; min-height: 220px; display: grid; justify-items: center; align-content: start;
+    background: radial-gradient(90% 60% at 30% 80%, #6b5a4e 0%, transparent 60%), radial-gradient(70% 50% at 85% 35%, #4a4550 0%, transparent 65%), linear-gradient(170deg, #3a3531 0%, #231f1c 55%, #151210 100%); }
+  .lock .ld { font-size: 12px; opacity: .85; }
+  .lock .lc { font-size: 54px; font-weight: 600; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .lock .wst { width: 100%; max-width: 320px; margin-top: 16px; text-shadow: 0 1px 6px rgba(0,0,0,.35); }
+  .home { width: 100%; max-width: 420px; justify-self: center; border-radius: 18px; padding: 14px; background: linear-gradient(180deg, #2e2a33 0%, #1b1a20 100%); display: grid; gap: 12px; }
+  .home-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .wsmall { border-radius: 20px; padding: 14px; aspect-ratio: 1; display: grid; align-content: center; }
+  .wsmall.dark, .wcal.dark { background: #26221F; color: #fff; }
+  .wsmall.light, .wcal.light { background: #F4F1EC; color: #1B1B1F; }
+  .apps { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; align-content: start; }
+  .apps i { aspect-ratio: 1; border-radius: 14px; background: rgba(255,255,255,.1); }
+  .wcal { border-radius: 22px; padding: 12px; display: grid; gap: 7px; font-size: 10px; }
+  .wcal .top { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .wcal .ttl { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
+  .wline { display: flex; gap: 5px; align-items: center; white-space: nowrap; overflow: hidden; font-size: 10.5px; }
+  .wline i { width: 3px; height: 11px; border-radius: 1px; flex: none; }
+  .wdim { opacity: .6; }
+  .wcal .wd span { color: inherit; opacity: .7; font-size: 9px; padding: 0; }
+  .wcal .grow { gap: 1px; }
+  .wcell { min-height: 31px; display: grid; align-content: start; gap: 1px; min-width: 0; }
+  .wcell.out { opacity: .35; }
+  .wcell .d { justify-self: center; font-size: 9px; font-weight: 700; padding: 0 3px; border-radius: 6px; font-variant-numeric: tabular-nums; }
+  .wcell .d.today { background: rgba(224,104,90,.35); }
+  .wcell .ebar { font-size: 7px; }
+  .partner { display: grid; gap: 8px; }
+  .pbtns { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pbtns button { font: inherit; font-size: 13px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 10px; padding: 7px 12px; cursor: pointer; }
+  .pbtns button:hover { border-color: var(--accent); }
+  .plog { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 12.5px; color: var(--muted); max-height: 150px; overflow-y: auto; }
+  .plog li { display: flex; gap: 8px; }
+  .plog time { font-family: var(--mono); font-size: 11.5px; flex: none; }
+  .notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .note { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; }
+  .note ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; font-size: 14px; }
+  .note li::marker { color: var(--muted); }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">튼튼이 · 앱 전체 목업</span>
+    <h1>한 손으로 3초, 엄마·아빠가 같이 보는 육아 기록</h1>
+    <p class="lede">실제 앱과 같은 색·배치·규칙으로 만든 클릭 목업이에요. 버튼을 짧게 누르면 바로 저장, 길게(마우스는 오른쪽 클릭) 누르면 상세 입력이 열려요. 기록하면 오른쪽 위젯과 달력이 같이 바뀌고, “아빠 폰에서” 버튼으로 가족 공유 동기화도 볼 수 있어요.</p>
+  </header>
+
+  <div class="toolbar">
+    <span class="tb-label">기기</span>
+    <div class="seg" role="group" aria-label="기기 선택">
+      <button type="button" data-plat="ios" aria-pressed="true">iPhone</button>
+      <button type="button" data-plat="galaxy" aria-pressed="false">Galaxy</button>
+    </div>
+    <span class="tb-label">화면 바로가기</span>
+    <div class="jump">
+      <button type="button" data-go="record">기록</button>
+      <button type="button" data-go="voice">말로 기록</button>
+      <button type="button" data-go="timeline">타임라인</button>
+      <button type="button" data-go="calendar">달력</button>
+      <button type="button" data-go="pattern">패턴</button>
+      <button type="button" data-go="widgets">위젯 설정</button>
+      <button type="button" data-go="family">가족 공유</button>
+    </div>
+  </div>
+
+  <section class="stage" aria-label="앱 시뮬레이션">
+    <div class="phone ios" id="phone">
+      <div class="screen" id="screen" data-app="dark">
+        <div class="island" id="island"></div>
+        <div class="sbar"><span data-tk="clock"></span><span id="sbar-r">5G ▮▮▮ 82%</span></div>
+        <main class="body" id="body"></main>
+        <button type="button" class="fab" id="fab" hidden aria-label="일정 추가">+</button>
+        <nav class="tabs" id="tabs" aria-label="앱 탭"></nav>
+        <div class="homeind" id="homeind"></div>
+        <div class="gnav" id="gnav" hidden><i></i><i></i><i></i></div>
+        <div class="toast" id="toast" role="status">
+          <span class="tt" id="toast-t"></span>
+          <button type="button" id="toast-edit">수정</button>
+          <button type="button" class="strong" id="toast-undo">취소</button>
+        </div>
+        <div class="scrim" id="scrim"></div>
+        <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="입력"></div>
+      </div>
+    </div>
+
+    <aside class="side" aria-label="위젯과 가족 공유">
+      <div class="card">
+        <div class="card-h"><h2 id="w1-title">잠금화면 · 튼튼이 상태</h2><span id="w1-sub">두 번째 캡처와 같은 모양, 초 단위</span></div>
+        <div id="w1"></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h2 id="w2-title">홈 화면 · 튼튼이 달력 (크게)</h2><span>오른쪽 위에 상태, 아래 한 달</span></div>
+        <div class="home" id="w2"></div>
+      </div>
+      <div class="card partner">
+        <div class="card-h"><h2>아빠 폰(Galaxy)에서</h2><span id="sync-state">동기화 대기 · 30초마다</span></div>
+        <div class="pbtns">
+          <button type="button" data-partner="formula">분유 180ml 기록</button>
+          <button type="button" data-partner="diaper">기저귀(대변) 기록</button>
+          <button type="button" data-partner="event">“예방접종” 일정 추가</button>
+        </div>
+        <ul class="plog" id="plog"><li><time>—</time><span>아빠 폰에서 기록하면 서버를 거쳐 이 폰의 타임라인·달력·위젯에 나타나요.</span></li></ul>
+      </div>
+    </aside>
+  </section>
+
+  <section class="notes" aria-label="화면 설명">
+    <div class="note">
+      <h2>기록</h2>
+      <ul>
+        <li>엄지 궤적: 오른손 기준 피벗에서 반지름 128·216, 각도 100·141·181°에 6개 버튼</li>
+        <li>분유·기저귀·이유식은 탭 한 번에 저장, 수면·모유는 시작/종료</li>
+        <li>확인 창 없이 저장하고 5초 되돌리기</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h2>달력 · 가족 공유</h2>
+      <ul>
+        <li>일정에 작성자(나/아빠)가 붙고 상대 폰에도 떠요</li>
+        <li>30초마다 + 기록 직후 동기화, 마지막 수정이 이김</li>
+        <li>설정 › 가족 공유에 서버 주소·가족 코드·내 이름</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h2>위젯</h2>
+      <ul>
+        <li>iPhone: 작게·중간·잠금화면 상태 위젯 + 크게 달력 위젯</li>
+        <li>Galaxy: 2×2 상태(“48:14 전” 표기) + 4×4 달력</li>
+        <li>설정 › 위젯에서 항목·다음 수유 계산·배경 선택</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<script src="voice-parser.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const pad = (n) => String(n).padStart(2, '0');
+  const MIN = 60000, HOUR = 3600000, DAY = 86400000;
+  const hm = (d) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const dur = (ms) => { const m = Math.max(0, Math.floor(ms / MIN)); return `${Math.floor(m / 60)}:${pad(m % 60)}`; };
+  const durMin = (ms) => (ms >= HOUR ? dur(ms) : `${Math.max(0, Math.floor(ms / MIN))}분`);
+  const rel = (ms) => { const s = Math.max(0, Math.floor(Math.abs(ms) / 1000)); const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = s % 60;
+    return h > 0 ? `${h}시간 ${m}분` : m > 0 ? `${m}분 ${x}초` : `${x}초`; };
+  const chrono = (ms) => { const s = Math.max(0, Math.floor(Math.abs(ms) / 1000)); const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), x = s % 60;
+    return h > 0 ? `${h}:${pad(m)}:${pad(x)}` : `${pad(m)}:${pad(x)}`; };
+  const midnight = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  const WD = '일월화수목금토';
+  const dayHeader = (d) => `${d.getMonth() + 1}월 ${d.getDate()}일 ${WD[d.getDay()]}요일`;
+
+  const LABEL = { formula: '분유', breast: '모유', sleep: '수면', solid: '이유식', diaper: '기저귀', bath: '목욕', temperature: '체온', medicine: '투약' };
+  const SUB = { pee: '소변', poop: '대변', both: '소변+대변' };
+  const EVC = { red: '#E0685A', orange: '#E59A4E', yellow: '#D9B44A', green: '#6FAF72', teal: '#4FA8A0', blue: '#5B8FD9', purple: '#9A7BD1', pink: '#D97FA7' };
+  const ICON = {
+    formula: 'M3 2l2.01 18.23C5.13 21.23 5.97 22 7 22h10c1.03 0 1.87-.77 1.99-1.77L21 2H3zm9 17c-1.66 0-3-1.34-3-3 0-2 3-5.4 3-5.4s3 3.4 3 5.4c0 1.66-1.34 3-3 3zm6.33-11H5.67l-.44-4h13.53l-.43 4z',
+    breast: 'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z',
+    sleep: 'M12.34 2.02C6.59 1.82 2 6.42 2 12c0 5.52 4.48 10 10 10 3.71 0 6.93-2.02 8.66-5.02-7.51-.25-12.09-8.43-8.32-14.96z',
+    solid: 'M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z',
+    diaper: 'M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z',
+    mic: 'M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z',
+    check: 'M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z',
+  };
+  const TAB_ICON = {
+    record: 'M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z',
+    timeline: 'M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z',
+    calendar: 'M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V10h14v10zM7 12h5v5H7z',
+    pattern: 'M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z',
+    settings: 'M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.49.49 0 0 0-.59-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54A.48.48 0 0 0 13.92 2h-3.84a.48.48 0 0 0-.48.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.49.49 0 0 0-.59.22L2.72 8.47a.49.49 0 0 0 .12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32a.49.49 0 0 0-.12-.61l-2.01-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z',
+  };
+  const svg = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d}"/></svg>`;
+  const colorOf = (r) => (r.type === 'diaper' ? (r.sub === 'pee' ? 'var(--pee)' : 'var(--poop)') : `var(--${r.type})`);
+  const periodOf = (d) => (d.getHours() >= 20 ? 'night' : 'nap');
+  const ambiguous = (d) => d.getHours() >= 18 && d.getHours() < 20;
+  const PERIOD = { nap: '낮잠', night: '밤잠' };
+
+  // ── 상태 ──
+  const now0 = Date.now();
+  const birth = midnight(new Date(now0 - 248 * DAY));
+  const S = {
+    tab: 'record', page: null, plat: 'ios', hand: 'right', theme: 'dark', formulaDefault: 150,
+    records: [], events: [], seq: 0,
+    tlFilter: 'all',
+    calMonth: new Date(new Date(now0).getFullYear(), new Date(now0).getMonth(), 1), calSel: midnight(new Date(now0)),
+    w: { showName: true, showDday: true, showFeeding: true, feedLabel: 'type', showNextFeed: true, nextMode: 'auto', fixedMin: 180, showSleep: true, calStatus: true, calToday: true, theme: 'dark' },
+    family: { url: 'https://tunteuni.example.com', code: '7f3a9c21e4b80d56aa19', name: '엄마', last: new Date(now0), busy: false },
+    sheet: null, saved: null, lastAction: null,
+  };
+  const add = (r) => { const rec = { id: ++S.seq, by: 'me', ...r }; S.records.push(rec); return rec; };
+  const live = () => S.records.filter((r) => !r.deleted);
+  const running = (type) => (type !== 'sleep' && type !== 'breast') ? undefined : live().filter((r) => r.type === type && !r.end).sort((a, b) => b.start - a.start)[0];
+
+  // ── 예시 데이터 (14일, 고정 난수) ──
+  (function seed() {
+    let s = 20260928;
+    const rnd = () => { s |= 0; s = (s + 0x6D2B79F5) | 0; let t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    const jit = (m) => (rnd() - 0.5) * 2 * m * MIN;
+    const cut = now0 - 3 * HOUR;
+    const base = midnight(new Date(now0));
+    const push = (r) => { if (r.start.getTime() < cut && (!r.end || r.end.getTime() < cut)) add(r); };
+    for (let d = 14; d >= 0; d--) {
+      const day = new Date(base.getTime() - d * DAY);
+      const at = (h, m, j = 15) => new Date(day.getTime() + h * HOUR + m * MIN + jit(j));
+      const by = () => (rnd() < 0.35 ? '아빠' : 'me');
+      // 밤잠: 전날 21시경 ~ 06시 반경
+      push({ type: 'sleep', period: 'night', start: new Date(day.getTime() - 3 * HOUR + jit(30)), end: at(6, 30, 30), by: by() });
+      for (const [h, m, len] of [[9, 40, 65], [13, 20, 85], [16, 40, 40]]) {
+        const st = at(h, m, 20);
+        push({ type: 'sleep', period: 'nap', start: st, end: new Date(st.getTime() + (len + jit(15) / MIN) * MIN), by: by() });
+      }
+      for (const [h, m] of [[6, 50], [10, 40], [14, 50], [18, 10], [20, 40], [1, 30]]) {
+        const st = at(h, m, 20);
+        if (rnd() < 0.2) push({ type: 'breast', start: st, end: new Date(st.getTime() + (10 + Math.round(rnd() * 8)) * MIN), by: 'me' });
+        else push({ type: 'formula', ml: [150, 180, 200, 200, 230][Math.floor(rnd() * 5)], start: st, by: by() });
+      }
+      for (const [h, m] of [[7, 0], [10, 10], [12, 30], [15, 20], [18, 30], [21, 0]]) {
+        const p = rnd();
+        push({ type: 'diaper', sub: p < 0.7 ? 'pee' : p < 0.9 ? 'poop' : 'both', texture: '보통', start: at(h, m, 25), by: by() });
+      }
+      push({ type: 'solid', food: ['쌀미음', '고구마', '단호박', '사과', '바나나'][Math.floor(rnd() * 5)], amount: '보통', start: at(11, 50, 15), by: 'me' });
+      if (d % 2 === 0) push({ type: 'bath', start: at(19, 20, 15), by: '아빠' });
+    }
+    // 지금 상태: 두 번째 캡처처럼 "모유 48분 14초 전 · 밤잠(낮잠) 47분 48초 전"
+    add({ type: 'formula', ml: 200, start: new Date(now0 - (4 * HOUR + 5 * MIN)), by: '아빠' });
+    add({ type: 'diaper', sub: 'pee', texture: '보통', start: new Date(now0 - 70 * MIN), by: 'me' });
+    add({ type: 'breast', start: new Date(now0 - (48 * MIN + 14000) - 14 * MIN), end: new Date(now0 - (48 * MIN + 14000)), by: 'me' });
+    const sl = new Date(now0 - (47 * MIN + 48000));
+    add({ type: 'sleep', period: periodOf(sl), start: sl, end: null, by: 'me' });
+
+    const D = (off, h, m) => new Date(base.getTime() + off * DAY + h * HOUR + m * MIN);
+    S.events = [
+      { id: 'e1', title: '소아과', start: D(0, 10, 0), color: 'red', by: 'me' },
+      { id: 'e2', title: '분유 주문', start: D(0, 14, 0), color: 'yellow', by: '아빠' },
+      { id: 'e3', title: '영유아 검진', start: D(-6, 11, 0), color: 'green', by: 'me', memo: '문진표 미리 작성' },
+      { id: 'e4', title: '문화센터', start: D(3, 11, 0), color: 'purple', by: 'me' },
+      { id: 'e5', title: '이유식 장보기', start: D(5, 18, 0), color: 'orange', by: '아빠' },
+      { id: 'e6', title: '할머니 댁', start: D(9, 0, 0), allDay: true, color: 'teal', by: '아빠' },
+      { id: 'e7', title: '어린이집 상담', start: D(12, 15, 0), color: 'blue', by: 'me' },
+    ];
+  })();
+
+  // ── 계산 (status_header.dart · widget_status.dart 와 같은 규칙) ──
+  const feedRef = (r) => (r.type === 'breast' ? (r.end || r.start) : r.start);
+  function feeds() { return live().filter((r) => r.type === 'formula' || r.type === 'breast').sort((a, b) => feedRef(a) - feedRef(b)); }
+  function headerPrediction() {
+    const refs = feeds().map(feedRef);
+    if (refs.length < 2) return null;
+    const tail = refs.slice(-4);
+    let sum = 0; for (let i = 1; i < tail.length; i++) sum += tail[i] - tail[i - 1];
+    const c = refs[refs.length - 1].getTime() + sum / (tail.length - 1);
+    return [new Date(c - 25 * MIN), new Date(c + 25 * MIN)];
+  }
+  function widgetStatus() {
+    const f = feeds();
+    const st = {};
+    if (f.length) {
+      const last = f[f.length - 1];
+      st.lastFeed = feedRef(last);
+      st.feedLabel = S.w.feedLabel === 'generic' ? '수유' : LABEL[last.type];
+      let iv = S.w.fixedMin * MIN;
+      if (S.w.nextMode === 'auto' && f.length >= 2) {
+        const tail = f.slice(-4).map(feedRef);
+        iv = (tail[tail.length - 1] - tail[0]) / (tail.length - 1);
+      }
+      st.next = new Date(st.lastFeed.getTime() + iv);
+    }
+    const sl = live().filter((r) => r.type === 'sleep').sort((a, b) => b.start - a.start)[0];
+    if (sl) {
+      if (!sl.end) { st.sleepLabel = PERIOD[sl.period || periodOf(sl.start)]; st.sleepAt = sl.start; }
+      else { st.sleepLabel = '기상'; st.sleepAt = sl.end; }
+    }
+    return st;
+  }
+  function summary(r) {
+    switch (r.type) {
+      case 'formula': return r.ml ? `${r.ml}ml` : '';
+      case 'breast': return r.end ? durMin(r.end - r.start) : '진행 중';
+      case 'sleep': return `${PERIOD[r.period || periodOf(r.start)]}${r.end ? ' · ' + durMin(r.end - r.start) : ''}`;
+      case 'solid': return [r.food, r.ml ? `${r.ml}ml` : '', r.amount && !r.ml ? r.amount : ''].filter(Boolean).join(' ');
+      case 'diaper': return `${SUB[r.sub] || ''}${r.sub !== 'pee' && r.texture ? ' · ' + r.texture : ''}`;
+      case 'temperature': return `${window.VoiceParser ? VoiceParser.formatCelsius(r.celsius) : r.celsius}℃`;
+      case 'medicine': return r.medicine || '';
+      default: return '';
+    }
+  }
+  const who = (r) => (r.by === 'me' ? '나' : r.by);
+
+  // ── 시간 표시: data-tk 요소를 1초마다 갱신 ──
+  const tk = (kind, at, extra = '') => `<span data-tk="${kind}" data-at="${at ? at.getTime() : ''}"${extra}></span>`;
+  function tickAll() {
+    const n = Date.now();
+    document.querySelectorAll('[data-tk]').forEach((el) => {
+      const k = el.dataset.tk, at = Number(el.dataset.at);
+      let t = '';
+      switch (k) {
+        case 'clock': t = hm(new Date(n)); break;
+        case 'dur': t = at ? dur(n - at) : '--:--'; break;
+        case 'durMin': t = durMin(n - at); break;
+        case 'ago': t = S.plat === 'galaxy' && el.dataset.w ? `${chrono(n - at)} 전` : `${rel(n - at)} 전`; break;
+        case 'next': {
+          const g = S.plat === 'galaxy' && el.dataset.w;
+          t = at > n ? `→ ${g ? chrono(at - n) : rel(at - n)} 남음` : `→ ${g ? chrono(n - at) : rel(n - at)} 지남`;
+          break;
+        }
+        case 'date': t = dayHeader(new Date(n)); break;
+      }
+      if (el.textContent !== t) el.textContent = t;
+    });
+  }
+
+  // ── 화면: 기록 ──
+  function ageLabel() {
+    const n = midnight(new Date());
+    const dPlus = Math.round((n - birth) / DAY);
+    let months = (n.getFullYear() - birth.getFullYear()) * 12 + (n.getMonth() - birth.getMonth());
+    let anchor;
+    for (;;) {
+      const tm = birth.getMonth() + months;
+      const y = birth.getFullYear() + Math.floor(tm / 12), mo = ((tm % 12) + 12) % 12;
+      const dim = new Date(y, mo + 1, 0).getDate();
+      anchor = new Date(y, mo, Math.min(birth.getDate(), dim));
+      if (anchor <= n) break;
+      months--;
+    }
+    const days = Math.round((n - anchor) / DAY);
+    return `D+${dPlus} (${months > 0 ? `${months}개월 ${days}일` : `${days}일`})`;
+  }
+  const ARC = ['formula', 'sleep', 'diaper', 'solid', 'breast', 'mic'];
+  const ARC_LABEL = { ...LABEL, mic: '말로 기록' };
+  function preview(type) {
+    const r = running(type);
+    if (r) return tk('dur', r.start);
+    if (type === 'formula') return `${S.formulaDefault}ml`;
+    if (type === 'diaper') return '소변';
+    if (type === 'solid') { const l = live().filter((x) => x.type === 'solid').sort((a, b) => b.start - a.start)[0]; return l ? esc(l.food || '') : '쌀미음'; }
+    return '';
+  }
+  function viewRecord() {
+    const today = midnight(new Date());
+    const todays = live().filter((r) => r.start >= today);
+    const ml = todays.filter((r) => r.type === 'formula').reduce((s, r) => s + (r.ml || 0), 0);
+    const sleepMs = live().filter((r) => r.type === 'sleep').reduce((s, r) => {
+      const a = Math.max(r.start.getTime(), today.getTime()), b = (r.end || new Date()).getTime();
+      return s + Math.max(0, b - a);
+    }, 0);
+    const diapers = todays.filter((r) => r.type === 'diaper').length;
+    const f = feeds();
+    const last = f.length ? feedRef(f[f.length - 1]) : null;
+    const pred = headerPrediction();
+    const runs = ['sleep', 'breast'].map(running).filter(Boolean);
+    return `<div class="rec">
+      <div class="hdr">
+        <div class="hdr-top"><b>튼튼이</b><span>${ageLabel()}</span></div>
+        <div class="lbl" style="margin-top:14px">마지막 수유 이후</div>
+        <div class="big"><b>${tk('dur', last)}</b><span>경과</span></div>
+        ${pred ? `<div class="pred">다음 수유 예상 ${hm(pred[0])}~${hm(pred[1])}</div>` : ''}
+        <div class="metrics">
+          <div><b>${ml}ml</b><small>오늘 수유</small></div><i></i>
+          <div><b>${durMin(sleepMs)}</b><small>수면</small></div><i></i>
+          <div><b>${diapers}</b><small>기저귀</small></div>
+        </div>
+      </div>
+      ${runs.map((r) => `<div class="banner" style="--k:${colorOf(r)}"><span>${LABEL[r.type]}${r.type === 'sleep' ? ' · ' + PERIOD[r.period] : ''} 기록 중 &nbsp;${tk('dur', r.start)}</span><button type="button" data-act="end" data-id="${r.id}">종료</button></div>`).join('')}
+      <div class="arc" id="arc"></div>
+    </div>`;
+  }
+  function layoutArc() {
+    const arc = $('arc');
+    if (!arc) return;
+    const w = arc.clientWidth, h = arc.clientHeight;
+    const s = w / 390;
+    const right = S.hand === 'right';
+    const px = right ? w - 48 * s : 48 * s, py = h - 88 * s;
+    const radii = [128 * s, 216 * s], angles = [100, 141, 181];
+    const size = Math.round(64 * s);
+    const pt = (r, deg) => [px + r * Math.cos(deg * Math.PI / 180) * (right ? 1 : -1), py - r * Math.sin(deg * Math.PI / 180)];
+    let g = `<svg class="guide" viewBox="0 0 ${w} ${h}" aria-hidden="true">`;
+    for (const r of radii) {
+      const [x1, y1] = pt(r, 95), [x2, y2] = pt(r, 186);
+      g += `<path d="M${x1.toFixed(1)} ${y1.toFixed(1)} A${r} ${r} 0 0 ${right ? 0 : 1} ${x2.toFixed(1)} ${y2.toFixed(1)}" fill="none" stroke="var(--a-soft)" stroke-width="1.2" stroke-dasharray="2 6"/>`;
+    }
+    g += `<circle cx="${px}" cy="${py}" r="3" fill="var(--a-outline)"/></svg>`;
+    const btns = ARC.map((type, i) => {
+      const [x, y] = pt(radii[i < 3 ? 0 : 1], angles[i % 3]);
+      const run = type !== 'mic' && running(type);
+      const cls = ['qb', type === 'mic' ? 'mic' : '', run ? 'running' : '', S.saved === type ? 'saved' : ''].join(' ');
+      const k = type === 'diaper' ? 'var(--pee)' : type === 'mic' ? 'var(--a-on)' : `var(--${type})`;
+      return `<button type="button" class="${cls}" data-qb="${type}" style="left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;--k:${k};--s:${size}px" aria-label="${ARC_LABEL[type]}${type === 'mic' ? '' : ' 기록 (길게 누르면 상세)'}">
+        <span class="c">${svg(S.saved === type ? ICON.check : ICON[type])}<span class="v">${type === 'mic' ? '' : preview(type)}</span></span><span class="l">${ARC_LABEL[type]}</span></button>`;
+    }).join('');
+    arc.innerHTML = `<p class="hint">짧게: 바로 저장 · 길게: 상세 입력</p>${g}${btns}`;
+  }
+
+  // ── 화면: 타임라인 ──
+  const TL_F = { all: () => true, feed: (r) => ['formula', 'breast', 'solid'].includes(r.type), sleep: (r) => r.type === 'sleep', diaper: (r) => r.type === 'diaper', etc: (r) => ['bath', 'temperature', 'medicine'].includes(r.type) };
+  function viewTimeline() {
+    const list = live().filter(TL_F[S.tlFilter]).sort((a, b) => {
+      const ar = !a.end && ['sleep', 'breast'].includes(a.type), br = !b.end && ['sleep', 'breast'].includes(b.type);
+      if (ar !== br) return ar ? -1 : 1;
+      return b.start - a.start;
+    });
+    const today = midnight(new Date());
+    const groups = [];
+    for (const r of list) {
+      const d = midnight(r.start);
+      if ((today - d) / DAY > 2) continue;
+      let g = groups.find((x) => x.d.getTime() === d.getTime());
+      if (!g) { g = { d, items: [] }; groups.push(g); }
+      g.items.push(r);
+    }
+    const fchip = (k, l) => `<button type="button" class="chip" data-act="tlf" data-v="${k}" aria-pressed="${S.tlFilter === k}">${l}</button>`;
+    return `<div class="pg">
+      <div class="pg-h"><h3>타임라인</h3></div>
+      <div class="chips">${fchip('all', '전체')}${fchip('feed', '수유')}${fchip('sleep', '수면')}${fchip('diaper', '기저귀')}${fchip('etc', '기타')}</div>
+      ${groups.map((g) => {
+        const diff = Math.round((today - g.d) / DAY);
+        return `<div class="day-h">${diff === 0 ? '오늘' : diff === 1 ? '어제' : ''} ${dayHeader(g.d)}</div><div class="tl">${g.items.map((r) => `
+          <button type="button" class="tl-row" data-act="edit" data-id="${r.id}">
+            <span class="t">${hm(r.start)}</span><span class="bar" style="background:${colorOf(r)}"></span>
+            <span class="m"><b>${LABEL[r.type]}</b>${summary(r) ? `<span>${esc(summary(r))}</span>` : ''}${!r.end && ['sleep', 'breast'].includes(r.type) ? `<span class="badge">${tk('dur', r.start)}</span>` : ''}</span>
+            <span class="who">${r.voice ? svg(ICON.mic) : ''}${esc(who(r))}</span>
+          </button>`).join('')}</div>`;
+      }).join('') || '<p class="muted">기록이 없어요</p>'}
+    </div>`;
+  }
+
+  // ── 화면: 달력 ──
+  function gridStart(m) { const f = new Date(m.getFullYear(), m.getMonth(), 1); return new Date(f.getFullYear(), f.getMonth(), 1 - f.getDay()); }
+  const occurs = (e, day) => sameDay(e.start, day);
+  function monthGrid(month, { sel, maxBars, cellCls, today }) {
+    const start = gridStart(month);
+    let out = '';
+    for (let w = 0; w < 6; w++) {
+      out += '<div class="grow">';
+      for (let d = 0; d < 7; d++) {
+        const day = new Date(start.getFullYear(), start.getMonth(), start.getDate() + w * 7 + d);
+        const evs = S.events.filter((e) => !e.deleted && occurs(e, day)).sort((a, b) => (b.allDay ? 1 : 0) - (a.allDay ? 1 : 0) || a.start - b.start);
+        const cls = [cellCls, day.getMonth() !== month.getMonth() ? 'out' : '', sel && sameDay(day, sel) ? 'sel' : ''].join(' ');
+        const dc = ['d', d === 0 ? 'sun' : d === 6 ? 'sat' : '', sameDay(day, today) ? 'today' : ''].join(' ');
+        const inner = `<span class="${dc}">${day.getDate()}</span>${evs.slice(0, maxBars).map((e) => `<span class="ebar" style="background:${EVC[e.color]}">${esc(e.title)}</span>`).join('')}${evs.length > maxBars ? `<span class="emore">+${evs.length - maxBars}</span>` : ''}`;
+        out += sel ? `<button type="button" class="${cls}" data-act="day" data-day="${day.getTime()}" aria-label="${dayHeader(day)} 일정 ${evs.length}개">${inner}</button>` : `<div class="${cls}">${inner}</div>`;
+      }
+      out += '</div>';
+    }
+    return out;
+  }
+  function viewCalendar() {
+    const m = S.calMonth;
+    const list = S.events.filter((e) => !e.deleted && occurs(e, S.calSel)).sort((a, b) => (b.allDay ? 1 : 0) - (a.allDay ? 1 : 0) || a.start - b.start);
+    return `<div class="pg" style="gap:8px">
+      <div class="pg-h"><h3>${m.getFullYear()}년 ${m.getMonth() + 1}월</h3>
+        <div class="chips"><button type="button" class="chip" data-act="today">오늘</button><button type="button" class="chip" data-act="mon" data-v="-1" aria-label="이전 달">‹</button><button type="button" class="chip" data-act="mon" data-v="1" aria-label="다음 달">›</button></div></div>
+      <div class="wd"><span class="sun">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span class="sat">토</span></div>
+      <div>${monthGrid(m, { sel: S.calSel, maxBars: 2, cellCls: 'cell', today: new Date() })}</div>
+      <div class="day-h" style="font-weight:600;color:var(--a-on);font-size:13px">${dayHeader(S.calSel)}</div>
+      <div>${list.map((e) => `<button type="button" class="ev-row" data-act="ev" data-id="${e.id}"><span class="t">${e.allDay ? '종일' : hm(e.start)}</span><i style="background:${EVC[e.color]}"></i><span>${esc(e.title)}${e.memo ? `<br><small class="muted">${esc(e.memo)}</small>` : ''}</span><span class="who">${esc(who(e))}</span></button>`).join('') || '<p class="muted">일정이 없어요 · ＋로 추가</p>'}</div>
+    </div>`;
+  }
+
+  // ── 화면: 패턴 ──
+  function viewPattern() {
+    const n = Date.now();
+    const from = n - DAY;
+    const R = 104, c = 130;
+    const ang = (t) => (((t.getHours() * 60 + t.getMinutes()) / 1440) * 360 - 90) * Math.PI / 180;
+    const P = (a, r) => [c + r * Math.cos(a), c + r * Math.sin(a)];
+    const arcPath = (a0, a1, r) => { let d = a1 - a0; if (d < 0) d += Math.PI * 2; const [x0, y0] = P(a0, r), [x1, y1] = P(a0 + d, r); return `M${x0.toFixed(1)} ${y0.toFixed(1)} A${r} ${r} 0 ${d > Math.PI ? 1 : 0} 1 ${x1.toFixed(1)} ${y1.toFixed(1)}`; };
+    let ring = `<svg width="260" height="260" viewBox="0 0 260 260" role="img" aria-label="최근 24시간 리듬">
+      <circle cx="${c}" cy="${c}" r="${R}" fill="none" stroke="var(--a-soft)" stroke-width="14"/>
+      <circle cx="${c}" cy="${c}" r="${R - 22}" fill="none" stroke="var(--a-soft)" stroke-width="1"/>
+      <circle cx="${c}" cy="${c}" r="${R - 40}" fill="none" stroke="var(--a-soft)" stroke-width="1"/>`;
+    for (let h = 0; h < 24; h += 6) {
+      const a = (h / 24) * Math.PI * 2 - Math.PI / 2; const [x, y] = P(a, R + 16);
+      ring += `<text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" fill="var(--a-muted)">${pad(h)}</text>`;
+    }
+    for (const r of live()) {
+      const s = r.start.getTime(), e = (r.end || new Date()).getTime();
+      if (e < from || s > n) continue;
+      const ss = new Date(Math.max(s, from)), ee = new Date(Math.min(e, n));
+      if (r.type === 'sleep') ring += `<path d="${arcPath(ang(ss), ang(ee), R)}" fill="none" stroke="var(--sleep)" stroke-width="14" stroke-linecap="butt"/>`;
+      else if (['formula', 'breast', 'solid'].includes(r.type)) { const [x, y] = P(ang(ss), R - 22); ring += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="var(--${r.type})"/>`; }
+      else if (r.type === 'diaper') { const [x, y] = P(ang(ss), R - 40); ring += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.5" fill="${colorOf(r)}"/>`; }
+    }
+    const [hx, hy] = P(ang(new Date(n)), R + 4), [hx2, hy2] = P(ang(new Date(n)), R - 50);
+    ring += `<line x1="${hx2.toFixed(1)}" y1="${hy2.toFixed(1)}" x2="${hx.toFixed(1)}" y2="${hy.toFixed(1)}" stroke="var(--a-on)" stroke-width="1.5"/>
+      <text x="${c}" y="${c - 2}" text-anchor="middle" font-size="22" font-family="IBM Plex Mono, monospace" fill="var(--a-on)">${hm(new Date(n))}</text>
+      <text x="${c}" y="${c + 16}" text-anchor="middle" font-size="10" fill="var(--a-on-var)">최근 24시간</text></svg>`;
+
+    const today = midnight(new Date());
+    let rows = '';
+    for (let d = 13; d >= 0; d--) {
+      const day = new Date(today.getTime() - d * DAY);
+      let cells = '';
+      for (let i = 0; i < 48; i++) {
+        const a = day.getTime() + i * 30 * MIN, b = a + 30 * MIN;
+        const on = live().some((r) => r.type === 'sleep' && Math.min(b, (r.end || new Date()).getTime()) - Math.max(a, r.start.getTime()) >= 15 * MIN);
+        cells += `<i${on ? ' class="on"' : ''}></i>`;
+      }
+      rows += `<div class="heat-row"><span>${day.getMonth() + 1}.${day.getDate()}</span><div class="heat-cells">${cells}</div></div>`;
+    }
+    const lg = (l, c2) => `<span><i style="background:${c2}"></i>${l}</span>`;
+    return `<div class="pg">
+      <div class="pg-h"><h3>패턴</h3></div>
+      <div class="lbl">24시간 리듬</div>
+      <div class="ring-wrap">${ring}</div>
+      <div class="legend">${lg('수면', 'var(--sleep)')}${lg('분유', 'var(--formula)')}${lg('모유', 'var(--breast)')}${lg('이유식', 'var(--solid)')}${lg('소변', 'var(--pee)')}${lg('대변', 'var(--poop)')}</div>
+      <div class="lbl" style="margin-top:8px">수면 히트맵 (14일)</div>
+      <div class="heat">${rows}<div class="heat-axis"><span></span><div><span>0</span><span>6</span><span>12</span><span>18</span><span>24</span></div></div></div>
+    </div>`;
+  }
+
+  // ── 화면: 설정 ──
+  const swb = (key, on, label) => `<button type="button" class="sw" role="switch" aria-checked="${on}" aria-label="${label}" data-act="wtoggle" data-k="${key}"></button>`;
+  const aseg = (act, cur, opts) => `<span class="aseg" role="group">${opts.map(([v, l]) => `<button type="button" data-act="${act}" data-v="${v}" aria-pressed="${cur === v}">${l}</button>`).join('')}</span>`;
+  function viewSettings() {
+    if (S.page === 'family') return viewFamily();
+    if (S.page === 'widgets') return viewWidgets();
+    const f = S.family;
+    return `<div class="pg" style="gap:0">
+      <div class="pg-h"><h3>설정</h3></div>
+      <div class="sec">아기 정보</div>
+      <div class="row"><span>튼튼이</span><span class="rv">${birth.getFullYear()}.${birth.getMonth() + 1}.${birth.getDate()} 출생 · ${ageLabel()}</span></div>
+      <div class="sec">공유 · 위젯</div>
+      <button type="button" class="row" data-act="page" data-v="family"><span>가족 공유 (기록·달력 동기화)</span><span class="rv">${f.busy ? '동기화 중…' : hm(f.last) + ' 동기화됨'} ›</span></button>
+      <button type="button" class="row" data-act="page" data-v="widgets"><span>위젯</span><span class="rv">›</span></button>
+      <div class="sec">입력</div>
+      <div class="row"><span>주 사용 손</span>${aseg('hand', S.hand, [['left', '왼손'], ['right', '오른손']])}</div>
+      <div class="sec">화면</div>
+      <div class="row"><span>테마</span>${aseg('theme', S.theme, [['dark', '어둡게'], ['light', '밝게']])}</div>
+      <div class="sec">기본값</div>
+      <div class="row"><span>분유 기본 용량</span><span class="step"><button type="button" data-act="fml" data-v="-10" aria-label="10ml 줄이기">−</button>${S.formulaDefault}ml<button type="button" data-act="fml" data-v="10" aria-label="10ml 늘리기">+</button></span></div>
+      <div class="row"><span>기저귀 기본 유형</span><span class="rv">소변</span></div>
+      <div class="sec">데이터</div>
+      <div class="row"><span>기록 내보내기</span><span class="rv">CSV</span></div>
+    </div>`;
+  }
+  function viewFamily() {
+    const f = S.family;
+    return `<div class="pg">
+      <div class="pg-h"><button type="button" class="back" data-act="page" data-v="">‹ 설정</button></div>
+      <h3 style="margin:0;font-size:20px;font-weight:600">가족 공유</h3>
+      <p class="muted" style="font-size:12.5px">엄마·아빠 폰에 같은 서버 주소와 가족 코드를 넣으면 기록과 달력 일정이 30초마다 서로 맞춰져요.</p>
+      <div class="field"><label for="f-name">내 이름 (기록·일정에 표시)</label><input id="f-name" value="${esc(f.name)}" autocomplete="off"></div>
+      <div class="field"><label for="f-url">서버 주소</label><input id="f-url" value="${esc(f.url)}" autocomplete="off"></div>
+      <div class="field"><label for="f-code">가족 코드</label><input id="f-code" type="password" value="${esc(f.code)}" autocomplete="off"></div>
+      <button type="button" class="pill-btn" data-act="sync">저장하고 동기화</button>
+      <div class="sync-line"><span class="dot${f.busy ? ' busy' : ''}"></span>${f.busy ? '동기화 중…' : `${hm(f.last)} 동기화됨 · 아빠 폰과 연결됨`}</div>
+      <p class="muted" style="font-size:11.5px">예시 기록은 공유되지 않아요. 서버 설치: 저장소 server/README.md</p>
+    </div>`;
+  }
+  function viewWidgets() {
+    const w = S.w;
+    const row = (label, key) => `<div class="row"><span>${label}</span>${swb(key, w[key], label)}</div>`;
+    return `<div class="pg" style="gap:0">
+      <div class="pg-h"><button type="button" class="back" data-act="page" data-v="">‹ 설정</button></div>
+      <h3 style="margin:0 0 10px;font-size:20px;font-weight:600">위젯</h3>
+      <div class="wprev ${w.theme === 'light' ? 'light' : 'dark'}">${statusBlock({ big: 20 })}</div>
+      <p class="muted" style="font-size:11.5px;margin:8px 0 4px">홈 화면을 길게 눌러 위젯 추가 → “튼튼이”에서 상태 위젯과 달력 위젯을 골라요.</p>
+      <div class="sec">표시 항목</div>
+      ${row('아기 이름', 'showName')}${row('D+일수', 'showDday')}${row('마지막 수유', 'showFeeding')}
+      ${w.showFeeding ? `<div class="row"><span>수유 표기</span>${aseg('wfl', w.feedLabel, [['type', '모유·분유로'], ['generic', '“수유”로']])}</div>
+        ${row('다음 수유까지 남은 시간', 'showNextFeed')}
+        ${w.showNextFeed ? `<div class="row"><span>다음 수유 계산</span>${aseg('wnm', w.nextMode, [['auto', '최근 간격 평균'], ['fixed', '고정 간격']])}</div>
+          <div class="row"><span>${w.nextMode === 'fixed' ? '수유 간격' : '기록이 부족할 때 간격'}</span><span class="step"><button type="button" data-act="wiv" data-v="-15" aria-label="15분 줄이기">−</button>${Math.floor(w.fixedMin / 60)}시간${w.fixedMin % 60 ? ' ' + (w.fixedMin % 60) + '분' : ''}<button type="button" data-act="wiv" data-v="15" aria-label="15분 늘리기">+</button></span></div>` : ''}` : ''}
+      ${row('수면 (자는 중 / 기상)', 'showSleep')}
+      <div class="sec">달력 위젯</div>
+      ${row('오른쪽 위에 수유·수면 표시', 'calStatus')}${row('왼쪽 위에 오늘 일정', 'calToday')}
+      <div class="sec">배경</div>
+      <div class="row"><span>위젯 배경</span>${aseg('wth', w.theme, [['dark', '어둡게'], ['light', '밝게']])}</div>
+    </div>`;
+  }
+
+  // ── 위젯 블록 (두 번째 캡처 모양) ──
+  function statusBlock({ big = 20, label = 15, head = 14, next = 13, widget = false } = {}) {
+    const w = S.w, st = widgetStatus();
+    const wa = widget ? ' data-w="1"' : '';
+    let h = `<div class="wst" style="--fb:${big}px;--fl:${label}px;--fh:${head}px;--fn:${next}px">`;
+    if (w.showName || w.showDday) h += `<div class="h"><span>${w.showName ? '튼튼이' : ''}</span><span>${w.showDday ? 'D+' + Math.round((midnight(new Date()) - birth) / DAY) : ''}</span></div>`;
+    if (w.showFeeding) {
+      if (st.lastFeed) {
+        h += `<div class="r"><b>${st.feedLabel}</b><span class="t">${tk('ago', st.lastFeed, wa)}</span></div>`;
+        if (w.showNextFeed && st.next) h += `<div class="n">${tk('next', st.next, wa)}</div>`;
+      } else h += '<div class="none">수유 기록 없음</div>';
+    }
+    if (w.showSleep && st.sleepAt) h += `<div class="r"><b>${st.sleepLabel}</b><span class="t">${tk('ago', st.sleepAt, wa)}</span></div>`;
+    return h + '</div>';
+  }
+  function renderSide() {
+    const g = S.plat === 'galaxy';
+    const wt = S.w.theme === 'light' ? 'light' : 'dark';
+    if (g) {
+      $('w1-title').textContent = '홈 화면 · 튼튼이 상태 (2×2)';
+      $('w1-sub').textContent = '안드로이드 위젯은 “48:14 전” 표기';
+      $('w1').innerHTML = `<div class="home"><div class="home-row"><div class="wsmall ${wt}">${statusBlock({ big: 17, label: 13, head: 13, next: 12, widget: true })}</div><div class="apps"><i></i><i></i><i></i><i></i></div></div></div>`;
+      $('w2-title').textContent = '홈 화면 · 튼튼이 달력 (4×4)';
+    } else {
+      $('w1-title').textContent = '잠금화면 · 튼튼이 상태';
+      $('w1-sub').textContent = '두 번째 캡처와 같은 모양, 초 단위';
+      $('w1').innerHTML = `<div class="lock"><div class="ld" data-tk="date"></div><div class="lc" data-tk="clock"></div>${statusBlock({ big: 21, widget: true })}</div>`;
+      $('w2-title').textContent = '홈 화면 · 튼튼이 달력 (크게)';
+    }
+    const today = new Date();
+    const todays = S.events.filter((e) => !e.deleted && occurs(e, today)).sort((a, b) => a.start - b.start);
+    const t1 = midnight(new Date(today.getTime() + DAY));
+    const upcoming = S.events.filter((e) => !e.deleted && e.start >= t1).sort((a, b) => a.start - b.start).slice(0, 4);
+    const left = `<div><div class="ttl">${dayHeader(today)}</div>${S.w.calToday ? (todays.length ? todays.slice(0, 4).map((e) => `<div class="wline"><i style="background:${EVC[e.color]}"></i>${e.allDay ? '종일' : hm(e.start)} ${esc(e.title)}</div>`).join('') : '<div class="wdim">오늘 일정 없음</div>') : ''}</div>`;
+    const right = S.w.calStatus ? statusBlock({ big: 13.5, label: 11.5, head: 11.5, next: 10, widget: true })
+      : `<div><div class="ttl">다가오는 일정</div>${upcoming.map((e) => `<div class="wline"><i style="background:${EVC[e.color]}"></i>${e.start.getMonth() + 1}/${e.start.getDate()} ${esc(e.title)}</div>`).join('') || '<div class="wdim">2주 안에 없음</div>'}</div>`;
+    $('w2').innerHTML = `<div class="wcal ${wt}"><div class="top">${left}${right}</div>
+      <div class="wd"><span class="sun">일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span class="sat">토</span></div>
+      <div>${monthGrid(today, { sel: null, maxBars: 2, cellCls: 'wcell', today })}</div></div>
+      <div class="home-row" style="grid-template-columns:repeat(4,1fr)">${'<div class="apps" style="grid-template-columns:1fr"><i></i></div>'.repeat(4)}</div>`;
+  }
+
+  // ── 렌더 ──
+  const TABS = [['record', '기록'], ['timeline', '타임라인'], ['calendar', '달력'], ['pattern', '패턴'], ['settings', '설정']];
+  function render() {
+    const body = $('body');
+    const keepScroll = body.dataset.tab === S.tab + (S.page || '') ? body.scrollTop : 0;
+    body.innerHTML = { record: viewRecord, timeline: viewTimeline, calendar: viewCalendar, pattern: viewPattern, settings: viewSettings }[S.tab]();
+    body.dataset.tab = S.tab + (S.page || '');
+    body.scrollTop = keepScroll;
+    $('tabs').innerHTML = TABS.map(([k, l]) => `<button type="button" data-act="tab" data-v="${k}"${S.tab === k ? ' aria-current="page"' : ''}>${svg(TAB_ICON[k])}<span>${l}</span></button>`).join('');
+    $('fab').hidden = S.tab !== 'calendar';
+    if (S.tab === 'record') layoutArc();
+    renderSide();
+    tickAll();
+  }
+
+  // ── 토스트 · 되돌리기 ──
+  let toastTimer = null;
+  function toast(text, action) {
+    S.lastAction = action || null;
+    $('toast-t').textContent = text;
+    $('toast-undo').hidden = !action;
+    $('toast-edit').hidden = !(action && action.rec);
+    $('toast').classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => $('toast').classList.remove('show'), 5000);
+  }
+  function flash(type) {
+    S.saved = type;
+    setTimeout(() => { if (S.saved === type) { S.saved = null; if (S.tab === 'record') layoutArc(), tickAll(); } }, 1500);
+  }
+  $('toast-undo').addEventListener('click', () => {
+    const a = S.lastAction; if (!a) return;
+    if (a.kind === 'add') a.rec.deleted = true;
+    if (a.kind === 'end') a.rec.end = null;
+    if (a.kind === 'update') Object.assign(a.rec, a.prev);
+    if (a.kind === 'delete') a.rec.deleted = false;
+    S.lastAction = null; $('toast').classList.remove('show'); render();
+  });
+  $('toast-edit').addEventListener('click', () => { const a = S.lastAction; $('toast').classList.remove('show'); if (a && a.rec) openDetail(a.rec.type, a.rec); });
+
+  // ── 짧게 누르기 ──
+  function shortTap(type) {
+    if (type === 'mic') return openVoice();
+    const t = new Date();
+    if (type === 'sleep' || type === 'breast') {
+      const r = running(type);
+      if (r) { r.end = t; flash(type); render(); return toast(`${hm(t)} ${LABEL[type]} 종료 · ${durMin(t - r.start)}`, { kind: 'end', rec: r }); }
+      const rec = add({ type, start: t, end: null, period: type === 'sleep' ? periodOf(t) : undefined });
+      flash(type); render();
+      return toast(`${hm(t)} ${LABEL[type]}${type === 'sleep' ? ' · ' + PERIOD[rec.period] : ''} 시작`, { kind: 'add', rec });
+    }
+    const extra = type === 'formula' ? { ml: S.formulaDefault } : type === 'diaper' ? { sub: 'pee', texture: '보통' } : { food: (live().filter((x) => x.type === 'solid').sort((a, b) => b.start - a.start)[0] || {}).food || '쌀미음', amount: '보통' };
+    const rec = add({ type, start: t, ...extra });
+    flash(type); render();
+    toast(`${hm(t)} ${LABEL[type]} ${summary(rec)} 저장됨`, { kind: 'add', rec });
+  }
+
+  // ── 시트 ──
+  function openSheet(kind, data) { S.sheet = { kind, ...data }; renderSheet(); $('screen').classList.add('open'); setTimeout(() => { const f = $('sheet').querySelector('[data-autofocus]'); if (f) f.focus(); }, 260); }
+  function closeSheet() { $('screen').classList.remove('open'); S.sheet = null; }
+  $('scrim').addEventListener('click', closeSheet);
+
+  function openDetail(type, rec) {
+    const t = rec ? rec.start : new Date();
+    openSheet('detail', { type, rec, f: {
+      ml: rec && rec.ml ? rec.ml : S.formulaDefault, off: 0, sub: rec ? rec.sub || 'pee' : 'pee', texture: rec ? rec.texture || '보통' : '보통',
+      food: rec ? rec.food || '쌀미음' : '쌀미음', amount: rec ? rec.amount || '보통' : '보통', period: rec ? rec.period || periodOf(t) : periodOf(t),
+      bmode: rec && rec.end ? 'done' : 'start', bmin: rec && rec.end ? Math.round((rec.end - rec.start) / MIN) : 10,
+      celsius: rec ? rec.celsius || 36.5 : 36.5, medicine: rec ? rec.medicine || '' : '',
+    } });
+  }
+  const chip = (act, v, cur, l) => `<button type="button" class="chip" data-act="${act}" data-v="${v}" aria-pressed="${String(cur) === String(v)}">${l ?? v}</button>`;
+  function detailBody(sh) {
+    const f = sh.f, editing = !!sh.rec;
+    const offs = editing ? '' : `<div class="sub">시각</div><div class="chips">${[[0, '지금'], [5, '5분 전'], [10, '10분 전'], [15, '15분 전'], [30, '30분 전']].map(([v, l]) => chip('off', v, f.off, l)).join('')}</div>`;
+    switch (sh.type) {
+      case 'formula':
+        return `<div class="vnum">${f.ml}ml</div><div class="chips">${[120, 150, 180, 200, 230].map((v) => chip('ml', v, f.ml, v + 'ml')).join('')}</div>
+          <input class="range" type="range" min="60" max="260" step="5" value="${f.ml}" data-act="mlr" aria-label="분유 용량">${offs}`;
+      case 'breast':
+        return editing && sh.rec.end ? `<div class="sub">수유 시간</div><div class="chips">${[5, 10, 15, 20, 30].map((v) => chip('bmin', v, f.bmin, v + '분')).join('')}</div>`
+          : `<div class="chips">${chip('bmode', 'start', f.bmode, '지금 시작')}${chip('bmode', 'done', f.bmode, '끝난 수유로 저장')}</div>
+          ${f.bmode === 'done' ? `<div class="sub">몇 분 먹었나요</div><div class="chips">${[5, 10, 15, 20, 30].map((v) => chip('bmin', v, f.bmin, v + '분')).join('')}</div>` : offs}`;
+      case 'sleep': {
+        const st = editing ? sh.rec.start : new Date(Date.now() - f.off * MIN);
+        const show = editing || ambiguous(st);
+        return `${offs}${show ? `<div class="sub">${editing ? '종류' : '18~20시는 직접 골라요'}</div><div class="chips">${chip('period', 'nap', f.period, '낮잠')}${chip('period', 'night', f.period, '밤잠')}</div>`
+          : `<p class="sub">시작 시각으로 자동 분류: <b style="color:var(--a-on)">${PERIOD[periodOf(st)]}</b> (20시 이후 밤잠)</p>`}`;
+      }
+      case 'diaper':
+        return `<div class="chips">${chip('sub', 'pee', f.sub, '소변')}${chip('sub', 'poop', f.sub, '대변')}${chip('sub', 'both', f.sub, '소변+대변')}</div>
+          ${f.sub !== 'pee' ? `<div class="sub">묽기</div><div class="chips">${['된편', '보통', '묽음', '물똥'].map((v) => chip('texture', v, f.texture)).join('')}</div>` : ''}${offs}`;
+      case 'solid':
+        return `<div class="sub">식재료</div><div class="chips">${['쌀미음', '고구마', '단호박', '사과', '바나나'].map((v) => chip('food', v, f.food)).join('')}</div>
+          <div class="sub">먹은 양</div><div class="chips">${['조금', '보통', '많이'].map((v) => chip('amount', v, f.amount)).join('')}</div>${offs}`;
+      case 'temperature':
+        return `<div class="vnum">${f.celsius.toFixed(1)}℃</div><div class="chips">${[36.5, 37.5, 38.0, 38.5, 39.0].map((v) => chip('celsius', v, f.celsius, v.toFixed(1) + '℃')).join('')}</div>`;
+      case 'medicine':
+        return `<div class="chips">${['해열제', '유산균', '비타민D', '감기약'].map((v) => chip('medicine', v, f.medicine)).join('')}</div>`;
+      default:
+        return '<p class="sub">시각만 기록돼요</p>';
+    }
+  }
+  function renderSheet() {
+    const sh = S.sheet; if (!sh) return;
+    const el = $('sheet');
+    if (sh.kind === 'detail') {
+      const editing = !!sh.rec;
+      const k = sh.type === 'diaper' ? (sh.f.sub === 'pee' ? 'var(--pee)' : 'var(--poop)') : `var(--${sh.type})`;
+      const startLabel = (sh.type === 'sleep' || (sh.type === 'breast' && sh.f.bmode === 'start')) && !editing ? '시작' : '저장';
+      el.style.setProperty('--k', k);
+      el.innerHTML = `<div class="grab"></div><h4><i style="background:${k}"></i>${LABEL[sh.type]} ${editing ? '수정' : '상세 입력'}</h4>
+        ${editing ? `<p class="sub">${dayHeader(sh.rec.start)} ${hm(sh.rec.start)} · ${esc(who(sh.rec))}${sh.rec.voice ? ' · 말로 기록' : ''}</p>` : ''}
+        ${detailBody(sh)}
+        <div class="btns">${editing ? '<button type="button" class="ghost-btn" data-act="del" style="margin-right:auto">삭제</button>' : ''}<button type="button" class="ghost-btn" data-act="close">취소</button><button type="button" class="pill-btn" data-act="save">${startLabel}</button></div>`;
+    } else if (sh.kind === 'voice') {
+      const ex = ['분유 230ml 먹었어', '모유 10분 먹었어', '이유식 150ml 먹었어', '소변 갈았어', '대변 갈았어', '잠들었어', '깼어', '목욕했어', '체온 38도야', '약 먹었어'];
+      el.innerHTML = `<div class="grab"></div><h4>말로 기록</h4>
+        <div class="bigmic${sh.listen ? ' listen' : ''}">${svg(sh.ok ? ICON.check : ICON.mic)}</div>
+        <div class="vmsg">${sh.heard ? `“${esc(sh.heard)}”` : '<span class="muted">듣고 있어요… 아래 문장을 누르거나 직접 입력</span>'}</div>
+        <div class="vmsg ${sh.ok ? 'ok' : sh.msg ? 'bad' : ''}">${esc(sh.msg || '')}</div>
+        <div class="chips">${ex.map((t) => `<button type="button" class="chip" data-act="say" data-v="튼튼이 ${t}">${t}</button>`).join('')}</div>
+        <form class="field" id="say-form"><label for="say-in">직접 입력 (예: 체온 37도 5부야, 해열제 먹었어)</label><input id="say-in" data-autofocus placeholder="튼튼이 분유 180 먹었어" autocomplete="off"></form>`;
+    } else if (sh.kind === 'event') {
+      const e = sh.f;
+      el.innerHTML = `<div class="grab"></div><h4>${sh.ev ? '일정 수정' : '새 일정'}</h4><p class="sub">${dayHeader(e.day)}</p>
+        <div class="field"><label for="ev-title">제목</label><input id="ev-title" value="${esc(e.title)}" placeholder="예: 예방접종" data-autofocus autocomplete="off"></div>
+        <div class="chips">${['예방접종', '영유아 검진', '소아과', '문화센터', '이유식 재료 장보기'].map((t) => `<button type="button" class="chip" data-act="evt" data-v="${t}">${t}</button>`).join('')}</div>
+        <div class="sub">시간</div><div class="chips">${['종일', '09:00', '10:00', '11:00', '14:00', '16:00', '19:00'].map((v) => chip('evtime', v, e.time)).join('')}</div>
+        <div class="sub">색</div><div class="dots">${Object.entries(EVC).map(([k, c]) => `<button type="button" data-act="evc" data-v="${k}" aria-pressed="${e.color === k}" aria-label="${k}" style="background:${c}"></button>`).join('')}</div>
+        <div class="field"><label for="ev-memo">메모</label><input id="ev-memo" value="${esc(e.memo || '')}" placeholder="준비물, 장소 등" autocomplete="off"></div>
+        <div class="btns">${sh.ev ? '<button type="button" class="ghost-btn" data-act="evdel" style="margin-right:auto">삭제</button>' : ''}<button type="button" class="ghost-btn" data-act="close">취소</button><button type="button" class="pill-btn" data-act="evsave">저장</button></div>`;
+    }
+  }
+  function saveDetail() {
+    const sh = S.sheet, f = sh.f, t = new Date(Date.now() - f.off * MIN);
+    const fields = {
+      formula: { ml: f.ml }, diaper: { sub: f.sub, texture: f.sub !== 'pee' ? f.texture : undefined }, solid: { food: f.food, amount: f.amount },
+      sleep: { period: f.period }, breast: {}, temperature: { celsius: f.celsius }, medicine: { medicine: f.medicine || undefined }, bath: {},
+    }[sh.type];
+    if (sh.rec) {
+      const prev = { ...sh.rec };
+      Object.assign(sh.rec, fields);
+      if (sh.type === 'breast' && sh.rec.end) sh.rec.start = new Date(sh.rec.end - f.bmin * MIN);
+      closeSheet(); render();
+      return toast(`${LABEL[sh.type]} 수정됨`, { kind: 'update', rec: sh.rec, prev });
+    }
+    let rec;
+    if (sh.type === 'breast') rec = f.bmode === 'done' ? add({ type: 'breast', start: new Date(Date.now() - f.bmin * MIN), end: new Date() }) : add({ type: 'breast', start: t, end: null });
+    else if (sh.type === 'sleep') rec = add({ type: 'sleep', start: t, end: null, period: ambiguous(t) ? f.period : periodOf(t) });
+    else rec = add({ type: sh.type, start: t, ...fields });
+    if (sh.type === 'formula') S.formulaDefault = f.ml;
+    closeSheet(); flash(sh.type); render();
+    toast(`${hm(rec.start)} ${LABEL[sh.type]} ${summary(rec)} ${rec.end === null ? '시작' : '저장됨'}`, { kind: 'add', rec });
+  }
+
+  // ── 말로 기록 (VoiceRecorder.execute 와 같은 규칙) ──
+  function openVoice() { openSheet('voice', { heard: '', msg: '', ok: false, listen: true }); }
+  function voiceExec(c) {
+    const t = new Date(), v = { voice: true };
+    switch (c.kind) {
+      case 'formula': { const ml = c.ml ?? S.formulaDefault; return { rec: add({ type: 'formula', ml, start: t, ...v }), msg: `분유 ${ml}ml 기록했어요` }; }
+      case 'breast': return { rec: add({ type: 'breast', start: new Date(t - c.minutes * MIN), end: t, ...v }), msg: VoiceParser.confirmation(c) };
+      case 'solid': return { rec: add({ type: 'solid', ml: c.ml, start: t, ...v }), msg: VoiceParser.confirmation(c) };
+      case 'diaper': { const sub = c.diaper || 'pee'; return { rec: add({ type: 'diaper', sub, texture: '보통', start: t, ...v }), msg: `${SUB[sub]} 기록했어요` }; }
+      case 'sleepStart': {
+        const r = running('sleep'); if (r) return { error: `이미 ${hm(r.start)}부터 자고 있어요` };
+        const period = periodOf(t); return { rec: add({ type: 'sleep', period, start: t, end: null, ...v }), msg: `${PERIOD[period]} 시작을 기록했어요` };
+      }
+      case 'sleepEnd': {
+        const r = running('sleep'); if (!r) return { error: '진행 중인 수면이 없어요. 먼저 “잠들었어”라고 말해 주세요' };
+        r.end = t; return { rec: r, ended: true, msg: `수면 종료 · ${durMin(t - r.start)} 잤어요` };
+      }
+      case 'bath': return { rec: add({ type: 'bath', start: t, ...v }), msg: '목욕 기록했어요' };
+      case 'temperature': return { rec: add({ type: 'temperature', celsius: c.celsius, start: t, ...v }), msg: VoiceParser.confirmation(c) };
+      case 'medicine': return { rec: add({ type: 'medicine', medicine: c.medicine, start: t, ...v }), msg: VoiceParser.confirmation(c) };
+    }
+    return { error: '알아듣지 못했어요' };
+  }
+  let voiceBusy = false;
+  function say(text) {
+    if (voiceBusy || !S.sheet || S.sheet.kind !== 'voice' || !text.trim()) return;
+    voiceBusy = true;
+    const sh = S.sheet;
+    sh.heard = text; sh.listen = false; sh.msg = ''; sh.ok = false; renderSheet();
+    setTimeout(() => {
+      const p = window.VoiceParser ? VoiceParser.parseVoiceCommand(text, { babyName: '튼튼이' }) : { error: '인식 모듈을 불러오지 못했어요' };
+      const res = p.command ? voiceExec(p.command) : { error: p.error };
+      if (!S.sheet) { voiceBusy = false; return; }
+      sh.msg = res.error || res.msg; sh.ok = !res.error; renderSheet(); render();
+      if (res.error) { voiceBusy = false; setTimeout(() => { if (S.sheet && S.sheet.kind === 'voice') { sh.listen = true; renderSheet(); } }, 1600); return; }
+      setTimeout(() => {
+        voiceBusy = false; closeSheet();
+        if (['formula', 'sleep', 'diaper', 'solid', 'breast'].includes(res.rec.type)) flash(res.rec.type);
+        render();
+        toast(`${hm(new Date())} ${res.msg}`, res.ended ? { kind: 'end', rec: res.rec } : { kind: 'add', rec: res.rec });
+      }, 1000);
+    }, 450);
+  }
+
+  // ── 일정 시트 ──
+  function openEvent(day, ev) {
+    openSheet('event', { ev, f: ev ? { day: midnight(ev.start), title: ev.title, time: ev.allDay ? '종일' : hm(ev.start), color: ev.color, memo: ev.memo || '' }
+      : { day, title: '', time: '10:00', color: 'red', memo: '' } });
+  }
+  function saveEvent() {
+    const sh = S.sheet, f = sh.f;
+    f.title = $('ev-title').value.trim(); f.memo = $('ev-memo').value.trim();
+    if (!f.title) { $('ev-title').placeholder = '제목을 입력해 주세요'; $('ev-title').focus(); return; }
+    const [h, m] = f.time === '종일' ? [0, 0] : f.time.split(':').map(Number);
+    const start = new Date(f.day.getFullYear(), f.day.getMonth(), f.day.getDate(), h, m);
+    if (sh.ev) Object.assign(sh.ev, { title: f.title, start, allDay: f.time === '종일', color: f.color, memo: f.memo });
+    else S.events.push({ id: 'n' + (++S.seq), title: f.title, start, allDay: f.time === '종일', color: f.color, memo: f.memo, by: 'me' });
+    closeSheet(); render(); toast(`일정 “${f.title}” 저장됨 · 아빠 폰에도 보여요`);
+  }
+
+  // ── 아빠 폰(동기화 흉내) ──
+  function plog(text) {
+    const li = document.createElement('li');
+    li.innerHTML = `<time>${hm(new Date())}</time><span>${esc(text)}</span>`;
+    const ul = $('plog'); if (ul.firstElementChild && ul.firstElementChild.querySelector('time').textContent === '—') ul.innerHTML = '';
+    ul.prepend(li);
+  }
+  function partner(kind) {
+    S.family.busy = true; $('sync-state').textContent = '아빠 폰 → 서버 → 엄마 폰 동기화 중…'; render();
+    setTimeout(() => {
+      const t = new Date();
+      let text;
+      if (kind === 'formula') { add({ type: 'formula', ml: 180, start: t, by: '아빠' }); text = '아빠 · 분유 180ml → 타임라인·위젯에 반영'; }
+      if (kind === 'diaper') { add({ type: 'diaper', sub: 'poop', texture: '보통', start: t, by: '아빠' }); text = '아빠 · 기저귀 대변 → 타임라인에 반영'; }
+      if (kind === 'event') {
+        const d = midnight(new Date(t.getTime() + 2 * DAY));
+        S.events.push({ id: 'p' + (++S.seq), title: '예방접종 (DTaP 3차)', start: new Date(d.getTime() + 10.5 * HOUR), color: 'red', by: '아빠', memo: '접종 수첩 챙기기' });
+        S.calSel = d; S.calMonth = new Date(d.getFullYear(), d.getMonth(), 1);
+        text = '아빠 · 일정 “예방접종” → 달력·달력 위젯에 반영';
+      }
+      S.family.busy = false; S.family.last = t;
+      $('sync-state').textContent = `${hm(t)} 동기화됨 · 30초마다`;
+      plog(text); render();
+      toast(text.replace(' → ', ' 기록 · ').replace(/에 반영$/, ''));
+    }, 1300);
+  }
+  document.querySelectorAll('[data-partner]').forEach((b) => b.addEventListener('click', () => partner(b.dataset.partner)));
+
+  // ── 이벤트 위임 ──
+  const phone = $('phone');
+  phone.addEventListener('click', (e) => {
+    const el = e.target.closest('[data-act]');
+    if (!el || el.dataset.qb) return;
+    const a = el.dataset.act, v = el.dataset.v;
+    const sh = S.sheet;
+    switch (a) {
+      case 'tab': S.tab = v; S.page = null; closeSheet(); render(); break;
+      case 'end': { const r = S.records.find((x) => x.id === Number(el.dataset.id)); if (r) { r.end = new Date(); flash(r.type); render(); toast(`${hm(r.end)} ${LABEL[r.type]} 종료 · ${durMin(r.end - r.start)}`, { kind: 'end', rec: r }); } break; }
+      case 'tlf': S.tlFilter = v; render(); break;
+      case 'edit': { const r = S.records.find((x) => x.id === Number(el.dataset.id)); if (r) openDetail(r.type, r); break; }
+      case 'day': S.calSel = new Date(Number(el.dataset.day)); if (S.calSel.getMonth() !== S.calMonth.getMonth()) S.calMonth = new Date(S.calSel.getFullYear(), S.calSel.getMonth(), 1); render(); break;
+      case 'today': { const n = new Date(); S.calSel = midnight(n); S.calMonth = new Date(n.getFullYear(), n.getMonth(), 1); render(); break; }
+      case 'mon': S.calMonth = new Date(S.calMonth.getFullYear(), S.calMonth.getMonth() + Number(v), 1); render(); break;
+      case 'ev': { const ev = S.events.find((x) => x.id === el.dataset.id); if (ev) openEvent(null, ev); break; }
+      case 'page': S.page = v || null; render(); $('body').scrollTop = 0; break;
+      case 'hand': S.hand = v; render(); break;
+      case 'theme': S.theme = v; $('screen').dataset.app = v; render(); break;
+      case 'fml': S.formulaDefault = Math.min(260, Math.max(60, S.formulaDefault + Number(v))); render(); break;
+      case 'wtoggle': S.w[el.dataset.k] = !S.w[el.dataset.k]; render(); break;
+      case 'wfl': S.w.feedLabel = v; render(); break;
+      case 'wnm': S.w.nextMode = v; render(); break;
+      case 'wiv': S.w.fixedMin = Math.min(480, Math.max(60, S.w.fixedMin + Number(v))); render(); break;
+      case 'wth': S.w.theme = v; render(); break;
+      case 'sync': {
+        const n = $('f-name'); if (n) S.family.name = n.value.trim() || '엄마';
+        S.family.busy = true; render();
+        setTimeout(() => { S.family.busy = false; S.family.last = new Date(); render(); toast('저장했어요 · 동기화 완료'); }, 800);
+        break;
+      }
+      // 시트 안
+      case 'close': closeSheet(); break;
+      case 'save': saveDetail(); break;
+      case 'del': { const r = sh.rec; r.deleted = true; closeSheet(); render(); toast(`${LABEL[r.type]} 삭제됨`, { kind: 'delete', rec: r }); break; }
+      case 'ml': sh.f.ml = Number(v); renderSheet(); break;
+      case 'off': sh.f.off = Number(v); renderSheet(); break;
+      case 'sub': sh.f.sub = v; renderSheet(); break;
+      case 'texture': sh.f.texture = v; renderSheet(); break;
+      case 'food': sh.f.food = v; renderSheet(); break;
+      case 'amount': sh.f.amount = v; renderSheet(); break;
+      case 'period': sh.f.period = v; renderSheet(); break;
+      case 'bmode': sh.f.bmode = v; renderSheet(); break;
+      case 'bmin': sh.f.bmin = Number(v); renderSheet(); break;
+      case 'celsius': sh.f.celsius = Number(v); renderSheet(); break;
+      case 'medicine': sh.f.medicine = v; renderSheet(); break;
+      case 'say': say(v); break;
+      case 'evt': $('ev-title').value = v; sh.f.title = v; break;
+      case 'evtime': sh.f.title = $('ev-title').value; sh.f.memo = $('ev-memo').value; sh.f.time = v; renderSheet(); break;
+      case 'evc': sh.f.title = $('ev-title').value; sh.f.memo = $('ev-memo').value; sh.f.color = v; renderSheet(); break;
+      case 'evsave': saveEvent(); break;
+      case 'evdel': { const ev = sh.ev; ev.deleted = true; closeSheet(); render(); toast(`일정 “${ev.title}” 삭제됨`); break; }
+    }
+  });
+  phone.addEventListener('input', (e) => {
+    if (e.target.dataset.act === 'mlr' && S.sheet) { S.sheet.f.ml = Number(e.target.value); const n = $('sheet').querySelector('.vnum'); if (n) n.textContent = `${S.sheet.f.ml}ml`;
+      $('sheet').querySelectorAll('[data-act="ml"]').forEach((c) => c.setAttribute('aria-pressed', String(Number(c.dataset.v) === S.sheet.f.ml))); }
+  });
+  phone.addEventListener('submit', (e) => { if (e.target.id === 'say-form') { e.preventDefault(); const i = $('say-in'); say(i.value); } });
+  $('fab').addEventListener('click', () => openEvent(S.calSel, null));
+
+  // 엄지 버튼: 짧게 / 길게(450ms) · 마우스 오른쪽 클릭 = 길게
+  let lp = null;
+  phone.addEventListener('pointerdown', (e) => {
+    const b = e.target.closest('[data-qb]'); if (!b || e.button === 2) return;
+    const type = b.dataset.qb;
+    lp = { type, fired: false, timer: setTimeout(() => { lp.fired = true; if (type !== 'mic') openDetail(type, null); }, 450) };
+  });
+  const cancelLp = () => { if (lp) clearTimeout(lp.timer); };
+  phone.addEventListener('pointerup', (e) => {
+    const b = e.target.closest('[data-qb]');
+    if (!lp) return; clearTimeout(lp.timer);
+    if (b && b.dataset.qb === lp.type && !lp.fired) shortTap(lp.type);
+    lp = null;
+  });
+  phone.addEventListener('pointerleave', cancelLp);
+  phone.addEventListener('pointercancel', () => { cancelLp(); lp = null; });
+  phone.addEventListener('contextmenu', (e) => { const b = e.target.closest('[data-qb]'); if (b) { e.preventDefault(); if (lp) { clearTimeout(lp.timer); lp = null; } if (b.dataset.qb !== 'mic') openDetail(b.dataset.qb, null); } });
+  phone.addEventListener('keydown', (e) => {
+    const b = e.target.closest('[data-qb]');
+    if (b && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); shortTap(b.dataset.qb); }
+    if (e.key === 'Escape' && S.sheet) closeSheet();
+  });
+
+  // ── 바깥 조작 ──
+  document.querySelectorAll('[data-plat]').forEach((b) => b.addEventListener('click', () => {
+    S.plat = b.dataset.plat;
+    document.querySelectorAll('[data-plat]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    const g = S.plat === 'galaxy';
+    phone.className = `phone ${g ? 'galaxy' : 'ios'}`;
+    $('island').className = g ? 'punch' : 'island';
+    $('homeind').hidden = g; $('gnav').hidden = !g;
+    $('sbar-r').textContent = g ? 'LTE ▮▮▮ 76%' : '5G ▮▮▮ 82%';
+    render();
+  }));
+  document.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => {
+    const v = b.dataset.go;
+    closeSheet();
+    if (v === 'voice') { S.tab = 'record'; S.page = null; render(); openVoice(); }
+    else if (v === 'widgets' || v === 'family') { S.tab = 'settings'; S.page = v; render(); }
+    else { S.tab = v; S.page = null; render(); }
+    if (innerWidth < 860) phone.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }));
+
+  let rz; addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (S.tab === 'record') { layoutArc(); tickAll(); } }, 120); });
+  render();
+  setInterval(tickAll, 1000);
+  setInterval(() => { if (!S.sheet && S.tab === 'record' && !lp) render(); }, 30000);
+})();
+</script>
+</body>
+</html>
