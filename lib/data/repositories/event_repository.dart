@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
@@ -33,13 +35,23 @@ class EventRepository {
   }
 
   /// [from, to) 구간에 걸친 일정. events 테이블이 바뀔 때마다 다시 읽는다.
-  Stream<List<CalendarEvent>> watchRange(DateTime from, DateTime to) async* {
-    yield await range(from, to);
-    await for (final _ in db.tableUpdates(
-      TableUpdateQuery.onTableName(kEventsTable),
-    )) {
-      yield await range(from, to);
-    }
+  Stream<List<CalendarEvent>> watchRange(DateTime from, DateTime to) {
+    // async* + await for 는 구독 취소가 늦게 전달돼 멈출 수 있어 컨트롤러로 직접 잇는다.
+    late final StreamController<List<CalendarEvent>> controller;
+    StreamSubscription<List<CalendarEvent>>? sub;
+    controller = StreamController<List<CalendarEvent>>(
+      onListen: () {
+        range(from, to).then((v) {
+          if (!controller.isClosed) controller.add(v);
+        }, onError: controller.addError);
+        sub = db
+            .tableUpdates(TableUpdateQuery.onTableName(kEventsTable))
+            .asyncMap((_) => range(from, to))
+            .listen(controller.add, onError: controller.addError);
+      },
+      onCancel: () => sub?.cancel(),
+    );
+    return controller.stream;
   }
 
   Future<CalendarEvent> create({

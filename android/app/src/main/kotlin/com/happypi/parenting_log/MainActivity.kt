@@ -1,7 +1,10 @@
 package com.happypi.parenting_log
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import com.happypi.parenting_log.widget.LockPanel
 import com.happypi.parenting_log.widget.WidgetData
 import com.happypi.parenting_log.widget.WidgetRender
 import io.flutter.embedding.android.FlutterActivity
@@ -29,12 +32,18 @@ class MainActivity : FlutterActivity() {
                 "saveConfig" -> {
                     val json = call.argument<String>("json")
                     getSharedPreferences(WidgetData.PREFS, Context.MODE_PRIVATE)
-                        .edit().putString(WidgetData.KEY_CONFIG, json).apply()
+                        .edit().putString(WidgetData.KEY_CONFIG, json).commit()
                     WidgetRender.updateAll(applicationContext)
+                    // 잠금화면 빠른 기록을 켰는데 알림 권한이 없으면(Android 13+) 요청한다.
+                    if (WidgetData.config(this).lockPanel && !LockPanel.canPost(this) && Build.VERSION.SDK_INT >= 33) {
+                        requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), REQ_NOTIF)
+                    }
+                    LockPanel.refresh(applicationContext)
                     result.success(null)
                 }
                 "reload" -> {
                     WidgetRender.updateAll(applicationContext)
+                    LockPanel.refresh(applicationContext)
                     result.success(null)
                 }
                 else -> result.notImplemented()
@@ -51,6 +60,11 @@ class MainActivity : FlutterActivity() {
                 }
             }
         }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQ_NOTIF) LockPanel.refresh(applicationContext)
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -86,5 +100,6 @@ class MainActivity : FlutterActivity() {
     companion object {
         private const val CHANNEL = "com.happypi.parentingLog/voice_launch"
         private const val WIDGET_CHANNEL = "com.happypi.parentingLog/widget"
+        private const val REQ_NOTIF = 27
     }
 }

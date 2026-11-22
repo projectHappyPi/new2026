@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 잠금화면 빠른 기록(펼친 모양): 상태 한 줄 + 버튼 6개 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+    <include layout="@layout/notif_panel_line"/>
+    <include layout="@layout/widget_quick_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="96dp"
+        android:layout_marginTop="6dp"/>
+</LinearLayout>

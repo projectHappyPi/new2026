@@ -43,6 +43,9 @@ class WidgetConfig {
   final bool calendarShowToday;
   final WidgetTheme theme;
 
+  /// 잠금화면 빠른 기록: iPhone은 실시간 현황(Live Activity), 안드로이드는 고정 알림.
+  final bool lockPanel;
+
   const WidgetConfig({
     this.showName = true,
     this.showDday = true,
@@ -55,6 +58,7 @@ class WidgetConfig {
     this.calendarShowStatus = true,
     this.calendarShowToday = true,
     this.theme = WidgetTheme.dark,
+    this.lockPanel = false,
   });
 
   WidgetConfig copyWith({
@@ -69,6 +73,7 @@ class WidgetConfig {
     bool? calendarShowStatus,
     bool? calendarShowToday,
     WidgetTheme? theme,
+    bool? lockPanel,
   }) => WidgetConfig(
     showName: showName ?? this.showName,
     showDday: showDday ?? this.showDday,
@@ -81,6 +86,7 @@ class WidgetConfig {
     calendarShowStatus: calendarShowStatus ?? this.calendarShowStatus,
     calendarShowToday: calendarShowToday ?? this.calendarShowToday,
     theme: theme ?? this.theme,
+    lockPanel: lockPanel ?? this.lockPanel,
   );
 
   Map<String, Object?> toJson() => {
@@ -95,6 +101,7 @@ class WidgetConfig {
     'calendarShowStatus': calendarShowStatus,
     'calendarShowToday': calendarShowToday,
     'theme': theme.name,
+    'lockPanel': lockPanel,
   };
 
   static T _enum<T extends Enum>(List<T> values, Object? name, T fallback) {
@@ -118,6 +125,7 @@ class WidgetConfig {
       calendarShowStatus: j['calendarShowStatus'] as bool? ?? d.calendarShowStatus,
       calendarShowToday: j['calendarShowToday'] as bool? ?? d.calendarShowToday,
       theme: _enum(WidgetTheme.values, j['theme'], d.theme),
+      lockPanel: j['lockPanel'] as bool? ?? d.lockPanel,
     );
   }
 }

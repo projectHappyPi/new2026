@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 /// Android MainActivity.kt와 이름이 반드시 같아야 한다.

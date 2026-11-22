@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -50,8 +52,17 @@ class WidgetSettingsScreen extends ConsumerWidget {
           const _Preview(),
           const SizedBox(height: 12),
           Text(
-            '홈 화면을 길게 눌러 위젯 추가 → "튼튼이"에서 상태 위젯(작게·중간·잠금화면)과 달력 위젯(크게)을 고를 수 있어요.',
+            '홈 화면을 길게 눌러 위젯 추가 → "튼튼이"에서 상태 위젯, 빠른 기록 위젯(버튼을 누르면 바로 저장), 달력 위젯을 고를 수 있어요.',
             style: AppTypography.label.copyWith(color: colors.muted),
+          ),
+          section('원클릭 기록'),
+          sw(
+            '잠금화면 빠른 기록',
+            cfg.lockPanel,
+            (v) => n.update((c) => c.copyWith(lockPanel: v)),
+            sub: Platform.isIOS
+                ? '잠금화면 아래에 상태와 버튼 6개(모유·분유·이유식·대변·소변·수면)를 띄워요. 최대 12시간 뒤 사라지면 앱을 열 때 다시 떠요.'
+                : '잠금화면 알림에 상태와 버튼을 띄워요. 처음 켜면 알림 권한을 물어봐요.',
           ),
           section('표시 항목'),
           sw('아기 이름', cfg.showName, (v) => n.update((c) => c.copyWith(showName: v))),

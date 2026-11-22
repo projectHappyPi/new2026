@@ -117,10 +117,44 @@ object WidgetRender {
 
     const val ACTION_REFRESH = "com.happypi.parenting_log.widget.REFRESH"
 
+    /** 원클릭 기록 버튼 → QuickLogReceiver. kind 마다 requestCode 를 달리해야 서로 덮어쓰지 않는다. */
+    fun quickIntent(context: Context, kind: QuickKind): PendingIntent {
+        val i = Intent(context, QuickLogReceiver::class.java)
+            .setAction(QuickLog.ACTION)
+            .putExtra(QuickLog.EXTRA_KIND, kind.name)
+        return PendingIntent.getBroadcast(
+            context, 100 + kind.ordinal, i,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+        )
+    }
+
+    /** 버튼 6개(모유·분유·이유식 / 대변·소변·수면)에 글자와 동작을 붙인다. 진행 중이면 "… 끝". */
+    fun fillButtons(context: Context, rv: RemoteViews) {
+        val (sleeping, breastRunning) = QuickLog.running(context)
+        val ids = listOf(
+            R.id.qb_breast to QuickKind.BREAST, R.id.qb_formula to QuickKind.FORMULA, R.id.qb_solid to QuickKind.SOLID,
+            R.id.qb_poop to QuickKind.POOP, R.id.qb_pee to QuickKind.PEE, R.id.qb_sleep to QuickKind.SLEEP,
+        )
+        for ((id, kind) in ids) {
+            val text = when {
+                kind == QuickKind.SLEEP && sleeping -> "깼어요"
+                kind == QuickKind.BREAST && breastRunning -> "모유 끝"
+                else -> kind.label
+            }
+            rv.setTextViewText(id, text)
+            rv.setInt(
+                id, "setBackgroundResource",
+                if ((kind == QuickKind.SLEEP && sleeping) || (kind == QuickKind.BREAST && breastRunning))
+                    R.drawable.quick_btn_active else R.drawable.quick_btn,
+            )
+            rv.setOnClickPendingIntent(id, quickIntent(context, kind))
+        }
+    }
+
     /** 앱이 기록·일정·설정을 바꿨을 때 모든 위젯을 다시 그린다. */
     fun updateAll(context: Context) {
         val m = AppWidgetManager.getInstance(context)
-        for (cls in listOf(StatusWidgetProvider::class.java, CalendarWidgetProvider::class.java)) {
+        for (cls in listOf(StatusWidgetProvider::class.java, CalendarWidgetProvider::class.java, QuickWidgetProvider::class.java)) {
             val ids = m.getAppWidgetIds(ComponentName(context, cls))
             if (ids.isEmpty()) continue
             context.sendBroadcast(

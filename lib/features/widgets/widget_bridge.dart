@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/sync/family_config.dart';
 import '../../providers/activity_provider.dart';
 import '../../providers/baby_profile_provider.dart';
+import '../../providers/settings_provider.dart';
 import 'widget_config.dart';
 
 /// iOS AppDelegate.swift / Android MainActivity.kt 와 이름이 같아야 한다.
@@ -38,6 +39,7 @@ class WidgetBridge {
     ref.listen(widgetConfigProvider, (_, _) => pushConfig());
     ref.listen(babyProfileProvider, (_, _) => pushConfig());
     ref.listen(familyConfigProvider, (_, _) => pushConfig());
+    ref.listen(settingsProvider, (_, _) => pushConfig());
   }
 
   void dispose() {
@@ -49,14 +51,18 @@ class WidgetBridge {
     final cfg = ref.read(widgetConfigProvider);
     final baby = ref.read(babyProfileProvider);
     final family = ref.read(familyConfigProvider);
+    final settings = ref.read(settingsProvider);
     final data = {
       ...cfg.toJson(),
       'babyName': baby.name ?? '',
       'birthDateSec': baby.birthDate == null
           ? null
           : baby.birthDate!.millisecondsSinceEpoch ~/ 1000,
-      // 시리로 남긴 기록의 작성자 이름.
+      // 시리·위젯·잠금화면에서 남긴 기록의 작성자 이름.
       'memberName': family.authorName,
+      // 원클릭 기록 기본값(앱 설정 > 기본값과 같게).
+      'formulaMl': settings.formulaDefaultMl,
+      'diaperDefault': settings.diaperDefaultSub.name,
     };
     try {
       await _channel.invokeMethod('saveConfig', {'json': jsonEncode(data)});

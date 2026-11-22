@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 튼튼이 빠른 기록 (4×2): 왼쪽 상태, 오른쪽 원클릭 버튼 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/qw_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg_dark"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:padding="12dp">
+
+    <include layout="@layout/widget_status_block"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginEnd="8dp"/>
+
+    <include layout="@layout/widget_quick_buttons"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1.35"/>
+</LinearLayout>

@@ -96,10 +96,10 @@ class _VoiceSheetState extends ConsumerState<VoiceSheet> {
     });
     await _stt.listen(
       onResult: _onResult,
-      localeId: _localeId,
-      listenFor: _listenFor,
-      pauseFor: _pauseFor,
       listenOptions: SpeechListenOptions(
+        localeId: _localeId,
+        listenFor: _listenFor,
+        pauseFor: _pauseFor,
         partialResults: true,
         cancelOnError: true,
         listenMode: ListenMode.confirmation,

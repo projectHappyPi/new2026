@@ -26,6 +26,14 @@ data class WidgetConfig(
     val theme: String = "dark",
     val babyName: String = "튼튼이",
     val birthDateSec: Long? = null,
+    /** 가족 공유의 내 이름. 위젯·잠금화면에서 남긴 기록의 작성자. */
+    val memberName: String = "me",
+    /** 빠른 기록 "분유" 한 번 누를 때 용량(앱 설정의 분유 기본 용량). */
+    val formulaMl: Int = 150,
+    /** 빠른 기록 "기저귀" 기본: pee / poop */
+    val diaperDefault: String = "pee",
+    /** 잠금화면 빠른 기록(알림 패널) 켜짐 여부. */
+    val lockPanel: Boolean = false,
 ) {
     companion object {
         fun from(json: String?): WidgetConfig {
@@ -46,6 +54,10 @@ data class WidgetConfig(
                     theme = j.optString("theme", "dark"),
                     babyName = j.optString("babyName").ifEmpty { "튼튼이" },
                     birthDateSec = if (j.isNull("birthDateSec")) null else j.optLong("birthDateSec"),
+                    memberName = j.optString("memberName").ifEmpty { "me" },
+                    formulaMl = j.optInt("formulaMl", 150),
+                    diaperDefault = j.optString("diaperDefault", "pee"),
+                    lockPanel = j.optBoolean("lockPanel", false),
                 )
             } catch (e: Exception) {
                 WidgetConfig()
@@ -79,7 +91,7 @@ object WidgetData {
         WidgetConfig.from(context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY_CONFIG, null))
 
     /** path_provider의 getApplicationDocumentsDirectory() = getDir("flutter"). */
-    private fun dbFile(context: Context) =
+    fun dbFile(context: Context) =
         File(context.getDir("flutter", Context.MODE_PRIVATE), "parenting_log.sqlite")
 
     private fun <T> withDb(context: Context, fallback: T, block: (SQLiteDatabase) -> T): T {

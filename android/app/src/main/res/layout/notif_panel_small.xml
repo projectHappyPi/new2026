@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 잠금화면 빠른 기록(접힌 모양): 상태 한 줄 + 자주 쓰는 버튼 3개 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+    <include layout="@layout/notif_panel_line"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="4dp"
+        android:orientation="horizontal">
+        <TextView android:id="@+id/qb_formula" style="@style/QuickBtn" android:text="분유"/>
+        <TextView android:id="@+id/qb_pee" style="@style/QuickBtn" android:text="소변"/>
+        <TextView android:id="@+id/qb_sleep" style="@style/QuickBtn" android:text="수면"/>
+    </LinearLayout>
+</LinearLayout>
