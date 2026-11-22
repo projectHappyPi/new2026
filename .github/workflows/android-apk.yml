@@ -1,0 +1,94 @@
+# 튼튼이 Android APK 자동 빌드
+# - 이 브랜치에 push 하거나 Actions 탭에서 "Run workflow"를 누르면 실행
+# - 분석 → 테스트 → APK 빌드 후, 릴리스 "android-latest"에 tunteuni.apk 로 올린다
+#   폰에서 받기: https://github.com/<저장소>/releases/download/android-latest/tunteuni.apk
+# - 실패하면 로그를 릴리스 "android-ci-log"에 ci-log.txt 로 올린다(로그인 없이 확인용)
+# - 서명: 저장소 Secrets에 ANDROID_KEYSTORE_BASE64 / ANDROID_KEYSTORE_PASSWORD /
+#   ANDROID_KEY_ALIAS 가 있으면 그 키로, 없으면 디버그 키로 서명한다.
+#   디버그 키는 빌드마다 바뀌어 "업데이트 설치"가 안 되고 지웠다 다시 깔아야 한다.
+name: Android APK
+
+on:
+  push:
+    branches: [claude/parenting-log-app-phase1-8omtvn]
+    paths-ignore: ['docs/**', 'server/**', '**.md']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-apk
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: 의존성
+        run: flutter pub get 2>&1 | tee -a ci-log.txt
+
+      - name: 분석
+        run: |
+          set -o pipefail
+          echo "===== flutter analyze =====" >> ci-log.txt
+          flutter analyze --no-fatal-infos 2>&1 | tee -a ci-log.txt
+
+      - name: 테스트
+        run: |
+          set -o pipefail
+          echo "===== flutter test =====" >> ci-log.txt
+          flutter test --reporter expanded 2>&1 | tee -a ci-log.txt
+
+      - name: 서명 키 준비 (Secrets 있을 때만)
+        env:
+          KS: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          if [ -n "$KS" ]; then
+            echo "$KS" | base64 -d > android/app/release.jks
+            printf 'storeFile=release.jks\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' "$KS_PASS" "${KS_ALIAS:-tunteuni}" "$KS_PASS" > android/key.properties
+            echo "릴리스 키로 서명" | tee -a ci-log.txt
+          else
+            echo "Secrets 없음: 디버그 키로 서명(업데이트 설치 불가, 재설치 필요)" | tee -a ci-log.txt
+          fi
+
+      - name: APK 빌드
+        run: |
+          set -o pipefail
+          echo "===== flutter build apk =====" >> ci-log.txt
+          flutter build apk --release --build-number=${{ github.run_number }} 2>&1 | tee -a ci-log.txt
+          cp build/app/outputs/flutter-apk/app-release.apk tunteuni.apk
+
+      - name: 릴리스에 올리기
+        run: |
+          gh release delete android-latest --cleanup-tag -y || true
+          gh release create android-latest tunteuni.apk \
+            --target "$GITHUB_SHA" --prerelease \
+            --title "튼튼이 Android (빌드 ${{ github.run_number }})" \
+            --notes "커밋 ${GITHUB_SHA::7} · $(date -u +'%Y-%m-%d %H:%M UTC')
+          폰 브라우저에서 tunteuni.apk 를 받아 설치하세요."
+
+      - name: 실패 로그 올리기
+        if: failure()
+        run: |
+          gh release delete android-ci-log --cleanup-tag -y || true
+          tail -c 900000 ci-log.txt > ci-log-tail.txt
+          gh release create android-ci-log ci-log-tail.txt#ci-log.txt \
+            --target "$GITHUB_SHA" --prerelease --title "CI 실패 로그" --notes "실행 ${{ github.run_id }}"
