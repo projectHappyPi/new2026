@@ -31,6 +31,8 @@
 			<string>튼튼</string>
 		</dict>
 	</array>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>말로 기록(예: "분유 230ml 먹었어")을 위해 마이크를 사용해요.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>

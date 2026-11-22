@@ -1,0 +1,46 @@
+# iOS 빌드 확인 (서명 없이). 앱 + 위젯 익스텐션(실시간 현황 포함)이 컴파일되는지만 본다.
+# 실제 설치용 빌드는 Codemagic(서명). 실패하면 로그를 릴리스 "ios-ci-log"에 올린다.
+name: iOS build check
+
+on:
+  push:
+    branches: [claude/parenting-log-app-phase1-8omtvn]
+    paths: ['ios/**', 'lib/**', 'pubspec.yaml', '.github/workflows/ios-check.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ios-check
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: 빌드 (서명 없이)
+        run: |
+          set -o pipefail
+          xcodebuild -version | tee ci-log.txt
+          flutter pub get 2>&1 | tee -a ci-log.txt
+          flutter build ios --release --no-codesign 2>&1 | tee -a ci-log.txt
+      - name: 성공 표시
+        run: |
+          gh release delete ios-ci-log --cleanup-tag -y || true
+      - name: 실패 로그 올리기
+        if: failure()
+        run: |
+          gh release delete ios-ci-log --cleanup-tag -y || true
+          grep -nE "error:|Error|warning: .*Swift|failed" ci-log.txt | head -300 > ci-errors.txt || true
+          tail -c 600000 ci-log.txt > ci-log-tail.txt
+          gh release create ios-ci-log ci-errors.txt ci-log-tail.txt \
+            --target "$GITHUB_SHA" --prerelease --title "iOS 빌드 실패 로그" --notes "실행 ${{ github.run_id }}"

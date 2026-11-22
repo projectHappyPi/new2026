@@ -20,6 +20,10 @@ struct WidgetConfig {
   var calendarShowStatus = true
   var calendarShowToday = true
   var theme = "dark"
+  /// 잠금화면 빠른 기록(실시간 현황) 켜짐.
+  var lockPanel = false
+  /// 원클릭 "분유" 용량(앱 설정의 분유 기본 용량).
+  var formulaMl = 150
   var babyName = "튼튼이"
   var birthDate: Date?
 
@@ -41,6 +45,8 @@ struct WidgetConfig {
     c.calendarShowStatus = j["calendarShowStatus"] as? Bool ?? true
     c.calendarShowToday = j["calendarShowToday"] as? Bool ?? true
     c.theme = j["theme"] as? String ?? "dark"
+    c.lockPanel = j["lockPanel"] as? Bool ?? false
+    c.formulaMl = j["formulaMl"] as? Int ?? 150
     if let n = j["babyName"] as? String, !n.isEmpty { c.babyName = n }
     if let b = j["birthDateSec"] as? NSNumber {
       c.birthDate = Date(timeIntervalSince1970: b.doubleValue)
@@ -62,6 +68,8 @@ struct BabyStatus {
   var sleepLabel: String?
   var sleepAt: Date?
   var sleeping = false
+  /// 모유 수유가 진행 중인지(버튼을 "모유 끝"으로 바꾼다).
+  var breastRunning = false
 }
 
 struct WidgetEvent: Identifiable {
@@ -158,6 +166,10 @@ enum WidgetStore {
           st.sleepAt = date(s, 1)
         }
       }
+      query(db, """
+        SELECT id FROM activities
+        WHERE deleted_at IS NULL AND type = 'breast' AND ended_at IS NULL LIMIT 1
+        """) { _ in st.breastRunning = true }
       return st
     }
   }

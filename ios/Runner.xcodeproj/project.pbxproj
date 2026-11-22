@@ -23,6 +23,11 @@
 		4A1092394810963EC2866CBB /* WidgetViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F0816C90D4AF21E06F5A6E7 /* WidgetViews.swift */; };
 		DA127B859404BA244A99E8AD /* TunteuniWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 712B3A8313090D060A445EFC /* TunteuniWidgets.swift */; };
 		7BD4DC3A944A5E986725FCD9 /* TunteuniWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A075F792833F8980FC35F32D /* TunteuniWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		1337CDD90BAF0AC449C7E797 /* QuickLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF967A1D47F28EC912697936 /* QuickLog.swift */; };
+		E87AC0BFEF6F1C1CF50AA243 /* QuickLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF967A1D47F28EC912697936 /* QuickLog.swift */; };
+		F531EDB35B08CCEB012C6813 /* LivePanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A13658463084B811C2543217 /* LivePanel.swift */; };
+		1E3E213B0CE6DB81B5CF3D0F /* SharedActivityStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B49FEE42DEB7DEAB678CF508 /* SharedActivityStore.swift */; };
+		B32279E910C61DE47CB84FCA /* WidgetStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A68EF33F74285F65C0D2AA21 /* WidgetStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -94,6 +99,8 @@
 		4133F12000AFCD2C9741F49C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1B4ED9463B89CAC1A518C375 /* TunteuniWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TunteuniWidget.entitlements; sourceTree = "<group>"; };
 		001328C731C1F96E9E06B965 /* Widget.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Widget.xcconfig; path = Flutter/Widget.xcconfig; sourceTree = "<group>"; };
+		CF967A1D47F28EC912697936 /* QuickLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickLog.swift; sourceTree = "<group>"; };
+		A13658463084B811C2543217 /* LivePanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivePanel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -169,6 +176,8 @@
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				7884E8672EC3CC0400C636F2 /* SceneDelegate.swift */,
 				B49FEE42DEB7DEAB678CF508 /* SharedActivityStore.swift */,
+				CF967A1D47F28EC912697936 /* QuickLog.swift */,
+				A13658463084B811C2543217 /* LivePanel.swift */,
 				19B443C85C9F8A59DA804229 /* VoiceIntents.swift */,
 				77134F16E8408BAABC26A7B6 /* VoiceIntentEnums.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
@@ -376,6 +385,9 @@
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 				7884E8682EC3CC0700C636F2 /* SceneDelegate.swift in Sources */,
 				8499A88A939EEF7CB3A98638 /* SharedActivityStore.swift in Sources */,
+				1337CDD90BAF0AC449C7E797 /* QuickLog.swift in Sources */,
+				F531EDB35B08CCEB012C6813 /* LivePanel.swift in Sources */,
+				B32279E910C61DE47CB84FCA /* WidgetStore.swift in Sources */,
 				3C3E3FF5F72BD979B5D72C27 /* VoiceIntents.swift in Sources */,
 				8739792765670C5142CAFA6A /* VoiceIntentEnums.swift in Sources */,
 			);
@@ -385,6 +397,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E87AC0BFEF6F1C1CF50AA243 /* QuickLog.swift in Sources */,
+				1E3E213B0CE6DB81B5CF3D0F /* SharedActivityStore.swift in Sources */,
 				DA127B859404BA244A99E8AD /* TunteuniWidgets.swift in Sources */,
 				4A1092394810963EC2866CBB /* WidgetViews.swift in Sources */,
 				9A2325AB8A87A77504CE735F /* WidgetStore.swift in Sources */,
@@ -715,7 +729,7 @@
 				CODE_SIGN_ENTITLEMENTS = TunteuniWidget/TunteuniWidget.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG WIDGET_EXTENSION $(inherited)";
 				INFOPLIST_FILE = TunteuniWidget/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -742,6 +756,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = TunteuniWidget/TunteuniWidget.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "WIDGET_EXTENSION $(inherited)";
 				SWIFT_COMPILATION_MODE = wholemodule;
 				INFOPLIST_FILE = TunteuniWidget/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -769,6 +784,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = TunteuniWidget/TunteuniWidget.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "WIDGET_EXTENSION $(inherited)";
 				SWIFT_COMPILATION_MODE = wholemodule;
 				INFOPLIST_FILE = TunteuniWidget/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;

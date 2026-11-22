@@ -1,3 +1,4 @@
+import ActivityKit
 import SwiftUI
 import WidgetKit
 
@@ -247,10 +248,166 @@ struct CalendarWidget: Widget {
   }
 }
 
+// MARK: - 원클릭 버튼 (빠른 기록 위젯 · 잠금화면 실시간 현황 공통)
+
+struct QuickButtonGrid: View {
+  let sleeping: Bool
+  let breastRunning: Bool
+  var height: CGFloat = 32
+
+  var body: some View {
+    VStack(spacing: 6) {
+      HStack(spacing: 6) {
+        button(.breast, breastRunning ? "모유 끝" : "모유", active: breastRunning)
+        button(.formula, "분유", active: false)
+        button(.solid, "이유식", active: false)
+      }
+      HStack(spacing: 6) {
+        button(.poop, "대변", active: false)
+        button(.pee, "소변", active: false)
+        button(.sleep, sleeping ? "깼어요" : "수면", active: sleeping)
+      }
+    }
+  }
+
+  private func button(_ kind: QuickKind, _ title: String, active: Bool) -> some View {
+    Button(intent: QuickLogIntent(kind: kind)) {
+      Text(title)
+        .font(.system(size: 14, weight: .semibold))
+        .lineLimit(1)
+        .minimumScaleFactor(0.7)
+        .frame(maxWidth: .infinity, minHeight: height)
+        .background(
+          RoundedRectangle(cornerRadius: 9)
+            .fill(active ? Color(red: 0.506, green: 0.537, blue: 0.788) : Color.white.opacity(0.16))
+        )
+        .foregroundStyle(.white)
+    }
+    .buttonStyle(.plain)
+  }
+}
+
+/// 튼튼이 빠른 기록 (중간): 왼쪽 상태, 오른쪽 버튼 6개. 누르면 앱을 열지 않고 저장.
+struct QuickWidgetView: View {
+  let entry: TunteuniEntry
+
+  var body: some View {
+    HStack(spacing: 10) {
+      StatusBlock(cfg: entry.cfg, st: entry.status, now: entry.date, fg: .white, dim: .white.opacity(0.6), big: 14, label: 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+      QuickButtonGrid(sleeping: entry.status.sleeping, breastRunning: entry.status.breastRunning)
+        .frame(maxWidth: .infinity)
+    }
+    .containerBackground(for: .widget) { Color(red: 0.149, green: 0.133, blue: 0.122) }
+  }
+}
+
+struct QuickWidget: Widget {
+  var body: some WidgetConfiguration {
+    StaticConfiguration(kind: "TunteuniQuick", provider: TunteuniProvider(withEvents: false)) { entry in
+      QuickWidgetView(entry: entry)
+    }
+    .configurationDisplayName("튼튼이 빠른 기록")
+    .description("버튼을 누르면 앱을 열지 않고 바로 기록돼요.")
+    .supportedFamilies([.systemMedium])
+  }
+}
+
+// MARK: - 잠금화면 실시간 현황 (Live Activity)
+
+struct PanelStatus: View {
+  let state: TunteuniPanelAttributes.ContentState
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 4) {
+      if let last = state.lastFeed {
+        row(state.feedLabel ?? "수유", last)
+      }
+      if let s = state.sleepAt {
+        row(state.sleepLabel ?? "수면", s)
+      }
+      if let next = state.nextFeed, next > Date() {
+        (Text("다음 수유 ") + Text(next, style: .relative) + Text(" 뒤"))
+          .font(.system(size: 11))
+          .foregroundStyle(.white.opacity(0.6))
+          .lineLimit(1)
+          .minimumScaleFactor(0.7)
+      }
+    }
+  }
+
+  private func row(_ label: String, _ at: Date) -> some View {
+    HStack(spacing: 6) {
+      Text(label).font(.system(size: 13, weight: .bold))
+      (Text(at, style: .relative) + Text(" 전"))
+        .font(.system(size: 13))
+        .monospacedDigit()
+        .foregroundStyle(.white.opacity(0.75))
+    }
+    .lineLimit(1)
+    .minimumScaleFactor(0.7)
+    .foregroundStyle(.white)
+  }
+}
+
+struct PanelLockView: View {
+  let context: ActivityViewContext<TunteuniPanelAttributes>
+
+  var body: some View {
+    HStack(alignment: .center, spacing: 12) {
+      VStack(alignment: .leading, spacing: 6) {
+        Text(title).font(.system(size: 14, weight: .bold)).foregroundStyle(.white)
+        Divider().overlay(Color.white.opacity(0.2))
+        PanelStatus(state: context.state)
+      }
+      .frame(maxWidth: .infinity, alignment: .leading)
+      QuickButtonGrid(sleeping: context.state.sleeping, breastRunning: context.state.breastRunning, height: 34)
+        .frame(maxWidth: .infinity)
+    }
+    .padding(14)
+  }
+
+  private var title: String {
+    guard let b = context.attributes.birthDate else { return context.attributes.babyName }
+    let cal = Calendar.current
+    let d = cal.dateComponents([.day], from: cal.startOfDay(for: b), to: cal.startOfDay(for: Date())).day ?? 0
+    return "\(context.attributes.babyName) D+\(d)"
+  }
+}
+
+struct PanelLiveActivity: Widget {
+  var body: some WidgetConfiguration {
+    ActivityConfiguration(for: TunteuniPanelAttributes.self) { context in
+      PanelLockView(context: context)
+        .activityBackgroundTint(Color(red: 0.11, green: 0.11, blue: 0.12))
+        .activitySystemActionForegroundColor(.white)
+    } dynamicIsland: { context in
+      DynamicIsland {
+        DynamicIslandExpandedRegion(.leading) {
+          PanelStatus(state: context.state)
+        }
+        DynamicIslandExpandedRegion(.bottom) {
+          QuickButtonGrid(sleeping: context.state.sleeping, breastRunning: context.state.breastRunning, height: 30)
+        }
+      } compactLeading: {
+        Image(systemName: context.state.sleeping ? "moon.zzz.fill" : "drop.fill")
+      } compactTrailing: {
+        if let last = context.state.lastFeed {
+          Text(last, style: .timer).monospacedDigit().frame(maxWidth: 52)
+        }
+      } minimal: {
+        Image(systemName: context.state.sleeping ? "moon.zzz.fill" : "drop.fill")
+      }
+    }
+  }
+}
+
 @main
 struct TunteuniWidgetBundle: WidgetBundle {
   var body: some Widget {
     StatusWidget()
+    QuickWidget()
     CalendarWidget()
+    PanelLiveActivity()
   }
 }

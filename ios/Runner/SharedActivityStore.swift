@@ -53,7 +53,7 @@ enum SharedActivityStore {
   ) throws {
     try withDatabase { db in
       var body = payload
-      body["via"] = "voice"
+      if body["via"] == nil { body["via"] = "voice" }
       let json = try String(
         data: JSONSerialization.data(withJSONObject: body, options: [.sortedKeys]),
         encoding: .utf8
@@ -81,6 +81,9 @@ enum SharedActivityStore {
       }
     }
     WidgetCenter.shared.reloadAllTimelines()
+    #if !WIDGET_EXTENSION
+    LivePanel.refresh()
+    #endif
   }
 
   /// 가족 공유에서 정한 내 이름(앱이 위젯 설정과 함께 넘겨준 값). 없으면 'me'.
@@ -130,6 +133,26 @@ enum SharedActivityStore {
       }
     }
     WidgetCenter.shared.reloadAllTimelines()
+    #if !WIDGET_EXTENSION
+    LivePanel.refresh()
+    #endif
+  }
+
+  /// 마지막 이유식의 식재료(원클릭 이유식에 쓴다).
+  static func lastSolidFood() -> String? {
+    var food: String?
+    try? withDatabase { db in
+      var stmt: OpaquePointer?
+      let sql = "SELECT payload FROM activities WHERE type = 'solid' AND deleted_at IS NULL ORDER BY started_at DESC LIMIT 1"
+      guard sqlite3_prepare_v2(db, sql, -1, &stmt, nil) == SQLITE_OK, let stmt else { return }
+      defer { sqlite3_finalize(stmt) }
+      if sqlite3_step(stmt) == SQLITE_ROW, let p = sqlite3_column_text(stmt, 0),
+         let data = String(cString: p).data(using: .utf8),
+         let j = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+        food = j["food"] as? String
+      }
+    }
+    return food
   }
 
   // MARK: - 내부

@@ -54,9 +54,11 @@ private let widgetChannelName = "com.happypi.parentingLog/widget"
           UserDefaults(suiteName: SharedActivityStore.appGroupId)?.set(json, forKey: "widgetConfig")
         }
         WidgetCenter.shared.reloadAllTimelines()
+        LivePanel.refresh()
         result(nil)
       case "reload":
         WidgetCenter.shared.reloadAllTimelines()
+        LivePanel.refresh()
         result(nil)
       default:
         result(FlutterMethodNotImplemented)
