@@ -24,6 +24,24 @@
 표시 항목·다음 수유 계산(최근 간격 평균/고정)·배경은 **설정 › 위젯**에서.
 iOS 위젯 타깃: `ios/TunteuniWidget/` (번들 ID `com.happypi.parentingLog.TunteuniWidget`).
 
+## Android 앱 받기
+
+이 브랜치에 push 하면 GitHub Actions가 테스트 → APK 빌드 후 릴리스에 올린다.
+
+- 폰 브라우저: https://github.com/projectHappyPi/new2026/releases/download/android-latest/tunteuni.apk
+- 처음 설치할 때 "출처를 알 수 없는 앱 설치"를 허용해야 한다.
+- 서명 키(Secrets `ANDROID_KEYSTORE_BASE64` · `ANDROID_KEYSTORE_PASSWORD` · `ANDROID_KEY_ALIAS`)가 있어야 새 버전이 기존 앱 위에 업데이트로 깔린다. 키를 바꾸면 지우고 다시 설치해야 하고, 이때 폰 안 기록이 지워진다(가족 공유 서버에 올라간 기록은 다시 내려받음).
+
+## 원클릭 기록 (위젯 · 잠금화면)
+
+| | iPhone | Galaxy |
+|---|---|---|
+| 홈 화면 | "튼튼이 빠른 기록"(중간) 위젯: 상태 + 버튼 6개 | "튼튼이 빠른 기록"(4×2) 위젯 |
+| 잠금화면 | 실시간 현황(Live Activity): 상태 + 버튼 6개, 최대 12시간 뒤 사라지면 앱을 열 때 다시 표시 | 고정 알림 패널: 상태 + 버튼(펼치면 6개) |
+
+버튼: 모유 · 분유 · 이유식 / 대변 · 소변 · 수면. 앱의 짧게 누르기와 같은 규칙(분유는 기본 용량, 수면·모유는 시작/종료).
+잠금화면 패널은 앱 설정 › 위젯 › "잠금화면 빠른 기록"으로 켠다.
+
 ## 말로 기록
 
 | 말하기 | 저장 |
